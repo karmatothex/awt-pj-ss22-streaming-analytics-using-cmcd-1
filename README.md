@@ -1,4 +1,4 @@
-# awt-pj-ss22-streaming-analytics-using-cmcd-1
+# awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1
 Video streaming analytics enable content providers to analyze how video players behave and identify problems on certain platforms or devices.  
 
 The Common-Media-Client-Data (CMCD) standard defines the format and the types of metrics send from a client to a metric server and database. A user interface build on top of the collected data helps evaluating and structuring the massive amount of information.  
