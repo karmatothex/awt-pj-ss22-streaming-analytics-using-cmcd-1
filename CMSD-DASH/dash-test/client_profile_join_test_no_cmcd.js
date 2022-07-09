@@ -66,7 +66,7 @@ const maxBufferGlobal = segmentDuration * 6;
 const clients =  [
     {
         joinDurationInMs: 0,
-        numClient: 4,
+        numClient: 2,
         videoUrl: url,
         minBuffer: minBufferGlobal,
         maxBuffer: maxBufferGlobal

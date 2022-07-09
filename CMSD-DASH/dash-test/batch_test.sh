@@ -13,7 +13,7 @@
 
 
 # @CONFIGURE
-NUMRUNS=2
+NUMRUNS=1
 PROFILE="10c_Cascade"
 VIDEOCOMMENT="Akamai video, minBuf:4s maxBuf:8s"
 # END @CONFIGURE
