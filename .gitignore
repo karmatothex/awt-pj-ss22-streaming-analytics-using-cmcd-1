@@ -1,10 +1,6 @@
 node_modules
 CMSD-dash/.DS_Store
 
-#results*
-CMSD-dash/results/*
-
-CMSD-dash/dash-test/results/*
 CMSD-dash/!dash-test/results/generate_summary.py
 CMSD-dash/dash-test/results_processing
 CMSD-dash/dash-test-batch-old
@@ -18,3 +14,10 @@ CMSD-dash/!cmcd-server/nginx/media/vod/QualaDataset/readme.txt
 CMSD-dash/cmcd-server/nginx/media/vod/NossdavCMCD/*
 CMSD-dash/!cmcd-server/nginx/media/vod/NossdavCMCD/readme.txt
 
+CMSD-DASH/dash-test/tmpUserDataDir/
+CMSD-DASH/dash-test/results/
+CMSD-DASH/dash-test/tc-network-profiles/log/
+
+CMSD-DASH/server/cmsd.csv
+CMSD-DASH/server/cmsd.log
+CMSD-DASH/server/cmsd_config.json
