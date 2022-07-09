@@ -1,9 +1,9 @@
 var querystring = require('querystring');
 var fs = require('fs');
 
-var LOGFILE = '/cmsd_logs/cmsd.log';  // most other directories wont work due to (recursive) write permission
-var CSVFILE = '/cmsd_logs/cmsd.csv';
-var CONFIGFILE = '/cmsd_logs/cmsd_config.json';
+var LOGFILE = 'cmsd.log';  // most other directories wont work due to (recursive) write permission
+var CSVFILE = 'cmsd.csv';
+var CONFIGFILE = 'cmsd_config.json';
 
 function writeLog(msg) {
     var dateTime = new Date().toLocaleString();
@@ -122,7 +122,8 @@ function getResourceUsingSubrequestBBRD(r) {
     function done(res) {
         r.headersOut['CMSD-Dynamic'] = ('com.example-dl=' + r.variables.bufferBasedDelay);
         r.headersOut['Access-Control-Expose-Headers'] = ['CMSD-Dynamic'];
-
+        writeLog('.. test')
+        writeLog(r.rawHeadersOut);
         r.return(res.status, res.responseBody);
     }
 
