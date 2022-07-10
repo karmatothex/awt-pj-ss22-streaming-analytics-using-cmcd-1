@@ -75,12 +75,11 @@ function readConfig(key) {
 //
 // Process query args into Javascript object
 //
-function processQueryArgs(r) {
-    var decodedQueryString = querystring.decode(r.variables.query_string);
-
+function processQueryArgs(str) {
+    var decodedQueryString = querystring.decode(str);
     // For dash.js-cmcd version differences
     var cmcdKey;
-    if (r.variables.query_string.includes('Common-Media-Client-Data'))
+    if (str.includes('Common-Media-Client-Data'))
         cmcdKey = 'Common-Media-Client-Data';
     else cmcdKey = 'CMCD';
 
@@ -115,15 +114,28 @@ function getResourceUsingSubrequestBBRD(r) {
     var dashObjUri = r.variables.args.split('/cmsd-njs/bufferBasedResponseDelay')[1].split('?')[0];
     var cmcdArgs = r.variables.args.split(dashObjUri + '?')[1].split(' ')[0];
 
+    var paramsObj = processQueryArgs(cmcdArgs);
+
+    writeLog("...paramsobj")
+    writeLog(JSON.stringify(paramsObj))
+
     writeLog('.. dashObjUri: ' + dashObjUri)
     writeLog('.. cmcdArgs: ' + cmcdArgs)
     writeLog('.. r.variables.bufferBasedDelay: ' + r.variables.bufferBasedDelay)
-    
+
+    var staticResp = "-";
+    var cmcdValuesToTake = ["st","ot","sf","v"]
+    for(var value in cmcdValuesToTake){
+        if(cmcdValuesToTake[value] in paramsObj){
+            staticResp += (cmcdValuesToTake[value] + "=" + paramsObj[cmcdValuesToTake[value]] + ",")
+        }
+    }
+
     function done(res) {
         r.headersOut['CMSD-Dynamic'] = ('com.example-dl=' + r.variables.bufferBasedDelay);
         r.headersOut['Access-Control-Expose-Headers'] = ['CMSD-Dynamic'];
+        r.headersOut['CMSD-Static'] = staticResp;
         writeLog('.. test')
-        writeLog(r.rawHeadersOut);
         r.return(res.status, res.responseBody);
     }
 
@@ -146,7 +158,7 @@ function getBufferBasedDelay(r) {
 
     writeLog('');
     writeLog('### getBufferBasedDelay() triggered!');
-    var paramsObj = processQueryArgs(r);
+    var paramsObj = processQueryArgs(r.variables.query_string);
 
     // If required args are not present in query, skip rate control
     if (!('bl' in paramsObj) || !('com.example-bmx' in paramsObj) || !('com.example-bmn' in paramsObj) || !('ot' in paramsObj) || !('br' in paramsObj) || !('d' in paramsObj) || !('mtp' in paramsObj)) {
