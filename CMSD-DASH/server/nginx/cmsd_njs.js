@@ -109,7 +109,7 @@ function getResourceUsingSubrequestBBRD(r) {
     // writeLog('.. args: ' + r.variables.args);
 
     // var dashObjUri = r.uri.split('/cmsd-njs/bufferBasedResponseDelay')[1];
-    
+
     // Different parsing for BBRD compared to BBRC due to use of echo_sleep and echo_exec
     var dashObjUri = r.variables.args.split('/cmsd-njs/bufferBasedResponseDelay')[1].split('?')[0];
     var cmcdArgs = r.variables.args.split(dashObjUri + '?')[1].split(' ')[0];
@@ -123,7 +123,12 @@ function getResourceUsingSubrequestBBRD(r) {
     writeLog('.. cmcdArgs: ' + cmcdArgs)
     writeLog('.. r.variables.bufferBasedDelay: ' + r.variables.bufferBasedDelay)
 
-    var staticResp = "-";
+    var staticResp = "";
+    var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
+    if (((Math.random()*10)|0)%10 == 0){ //probability of 10%
+        writeLog("Overload occured");
+        dynamicResp += ",du";
+    }
     var cmcdValuesToTake = ["st","ot","sf","v"]
     for(var value in cmcdValuesToTake){
         if(cmcdValuesToTake[value] in paramsObj){
@@ -132,7 +137,7 @@ function getResourceUsingSubrequestBBRD(r) {
     }
 
     function done(res) {
-        r.headersOut['CMSD-Dynamic'] = ('com.example-dl=' + r.variables.bufferBasedDelay);
+        r.headersOut['CMSD-Dynamic'] = dynamicResp;
         r.headersOut['Access-Control-Expose-Headers'] = ['CMSD-Dynamic'];
         r.headersOut['CMSD-Static'] = staticResp;
         writeLog('.. test')
