@@ -227,6 +227,12 @@
 
             
             player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => { 
+                if (e.request.responseHeaders.includes("du")) {
+                    console.warn("...SERVER OVERLOADED...")
+                    console.warn("Switching to the port 8090")
+                    player.attachSource("http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd"
+                    )
+                }
                 console.warn('Fragment loading completed', e);
                 console.warn('player.getSettings().streaming', player.getSettings().streaming);
             });
@@ -311,9 +317,14 @@
                 history.currentBufferLength = currentBuffer;
                 
                 var headers = parseResponseHeaders(e.request.responseHeaders);
-                if ('cmsd-dynamic' in headers && headers['cmsd-dynamic'].split('=')[0] == 'com.example-dl') {
+                
+                //basically it looks like we are not reaching this section at all
+                
+                if ('cmsd-dynamic' in headers && headers['cmsd-dynamic'].split('=')[0] == 'com.example-dl') { 
+                    //not sure if we can split it like this in case of multiple parameters
                     history.delayDurationS = parseInt(headers['cmsd-dynamic'].split('=')[1]);
                 }
+
 
                 // get segment key e.g. 'chunk-stream0-00010'
                 let urlParsed = e.request.url.split('/');

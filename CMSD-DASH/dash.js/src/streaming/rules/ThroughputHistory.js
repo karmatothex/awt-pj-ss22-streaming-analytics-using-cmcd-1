@@ -96,10 +96,7 @@ function ThroughputHistory(config) {
         // Extension to dash.js for [CMSD-DASH] -- start
         let throughput;
         let headers = parseResponseHeaders(httpRequest._responseHeaders);
-        if ('cmsd-dynamic' in headers && headers['cmsd-dynamic'].includes("du")){
 
-            console.warn("...SERVER SAYS ITS OVERLOADED...")
-        }
         if ('cmsd-dynamic' in headers && headers['cmsd-dynamic'].split('=')[0] == 'com.example-dl') {
             const cmsdDelayInSeconds = parseInt(headers['cmsd-dynamic'].split('=')[1]);
             const throughputMeasureTimeCmsd = throughputMeasureTime + (cmsdDelayInSeconds * 1000);
