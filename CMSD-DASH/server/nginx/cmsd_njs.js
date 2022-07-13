@@ -1,9 +1,11 @@
 var querystring = require('querystring');
 var fs = require('fs');
 
-var LOGFILE = 'cmsd.log';  // most other directories wont work due to (recursive) write permission
-var CSVFILE = 'cmsd.csv';
-var CONFIGFILE = 'cmsd_config.json';
+// TODO: insert the absolute path 
+var LOGPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/server/logs/'
+var LOGFILE = LOGPATH + 'cmsd.log';
+var CSVFILE = LOGPATH +'cmsd.csv';
+var CONFIGFILE = LOGPATH + 'cmsd_config.json';
 
 function writeLog(msg) {
     var dateTime = new Date().toLocaleString();

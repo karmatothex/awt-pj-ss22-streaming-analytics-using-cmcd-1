@@ -18,6 +18,4 @@ CMSD-DASH/dash-test/tmpUserDataDir/
 CMSD-DASH/dash-test/results/
 CMSD-DASH/dash-test/tc-network-profiles/log/
 
-CMSD-DASH/server/cmsd.csv
-CMSD-DASH/server/cmsd.log
-CMSD-DASH/server/cmsd_config.json
+CMSD-DASH/server/logs/*
