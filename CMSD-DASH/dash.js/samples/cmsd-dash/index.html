@@ -235,20 +235,22 @@
             });
             
             player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => { 
-                console.warn("hezehz")
+                console.warn("Fragment loaded")
                 console.warn(e)
                 //Checking, if the origin is overloaded and we have to switch to the another one
                 //TODO: also consider rtt
+
                 if (e.request.responseHeaders.includes("du")) {
                     console.warn("...SERVER OVERLOADED...")
                     var change_origin = window.confirm("Origin says, its overloaded. Change to another one?");
                     if (change_origin) {
+                        var stopedAt = player.time();
                         if (e.request.serviceLocation.includes("8080")) {
                             console.warn(">>>Switching to the port 8090")
-                            player.attachSource("http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd")
+                            player.attachSource("http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd"+"#t="+stopedAt.toString())
                         } else {
                             console.warn(">>>Switching to the port 8080")
-                            player.attachSource("http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd")
+                            player.attachSource("http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd"+"#t="+stopedAt.toString())
                         }
                     }
                 }
@@ -265,7 +267,7 @@
                         
                         abr: { //this is the another point to change something, but we have to research more about abr and how it works
                             maxBitrate:{
-                                viedo: 1, //TODO: This values should be lower/equal then CMSD-mb 
+                                video: 1, //TODO: This values should be lower/equal then CMSD-mb 
                             }
                             },
                             useDefaultABRRules: true,
