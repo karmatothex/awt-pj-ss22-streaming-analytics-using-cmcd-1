@@ -263,12 +263,13 @@
                         //Maybe we can increase buffertime for the better bandwith utilization
                         //The idea - to load more data, while we have such an option
                         //TODO: connect it with CMSD-etp, also CMSD-rtt?
-                        stableBufferTime: player.getSettings().streaming.stableBufferTime * 1.1,
-                        bufferTimeAtTopQualityLongForm: player.getSettings().streaming.bufferTimeAtTopQuality * 1.1,
+                        //stableBufferTime: player.getSettings().streaming.stableBufferTime * 1.1,
+                        //bufferTimeAtTopQualityLongForm: player.getSettings().streaming.bufferTimeAtTopQuality * 1.1,
                         
                         abr: { //this is the another point to change something, but we have to research more about abr and how it works
                             maxBitrate:{
-                                video: 1, //TODO: This values should be lower/equal then CMSD-mb 
+                                video: 5000, //TODO: This values should be lower/equal then CMSD-mb 
+                                //Be carefull by changing it :D
                             }
                             },
                             useDefaultABRRules: true,
