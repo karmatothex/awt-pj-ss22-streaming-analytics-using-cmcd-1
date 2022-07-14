@@ -1,7 +1,7 @@
 var querystring = require('querystring');
 var fs = require('fs');
 
-// TODO: insert the absolute path tp project
+// TODO: insert the absolute path to the project
 var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/'
 
 var LOGPATH = PROJECTPATH + 'server/logs/'
@@ -108,10 +108,11 @@ function processQueryArgs(str) {
 }
 
 //
-// Sample query: http://localhost:8080/cmsd-njs//media/vod/bbb_30fps_akamai/bbb_30fps.mpd?CMCD=bl%3D21300
+// Sample query: http://localhost:8090/cmsd-njs//media/vod/bbb_30fps_akamai/bbb_30fps.mpd?CMCD=bl%3D21300
 //
 function getResourceUsingSubrequestBBRD(r) {
     writeLog('');
+    writeLog('### get resource from: ' + getOriginIdentifier());
     writeLog('### getResourceUsingSubrequestBBRD(r) triggered: ' + r.uri);
     // writeLog('.. args: ' + r.variables.args);
 
@@ -128,10 +129,10 @@ function getResourceUsingSubrequestBBRD(r) {
 
     writeLog('.. dashObjUri: ' + dashObjUri)
     writeLog('.. cmcdArgs: ' + cmcdArgs)
-    writeLog('.. r.variables.bufferBasedDelay: ' + r.variables.bufferBasedDelay)
+    writeLog('.. r.variables.bufferBasedDelay: ' + r.variables.bufferBasedDelay2)
 
     var staticResp = 'n=' + getOriginIdentifier() + ',';
-    var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
+    var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay2);
     if (getServerLoad() > 60){ //test
         writeLog("Overload occured");
         dynamicResp += ",du";
@@ -147,7 +148,6 @@ function getResourceUsingSubrequestBBRD(r) {
         r.headersOut['CMSD-Dynamic'] = dynamicResp;
         r.headersOut['Access-Control-Expose-Headers'] = ['CMSD-Dynamic'];
         r.headersOut['CMSD-Static'] = staticResp;
-        writeLog('.. test')
         r.return(res.status, res.responseBody);
     }
 
@@ -162,7 +162,7 @@ function getResourceUsingSubrequestBBRD(r) {
 // Triggered via bufferBasedResponseDelay.echo_sleep setting in nginx.conf
 //
 // Test queries -
-// curl -i http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/bbb_30fps_akamai/bbb_30fps.mpd?CMCD=bl%3D21300%2Ccom.example-bmx%3D20000%2Ccom.example-bmn%3D5000%2Cot%3Dv%2Cbr%3D1000%2Cd%3D4000%2Cmtp%3D1000
+// curl -i http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/bbb_30fps_akamai/bbb_30fps.mpd?CMCD=bl%3D21300%2Ccom.example-bmx%3D20000%2Ccom.example-bmn%3D5000%2Cot%3Dv%2Cbr%3D1000%2Cd%3D4000%2Cmtp%3D1000
 //
 function getBufferBasedDelay(r) {
     var metricsObj = {}
@@ -308,6 +308,7 @@ function getBufferBasedDelay(r) {
     return delay;
 }
 
+// curl -v http://localhost:8080/getStatus
 function getServerStatus(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER2CONFIG);
@@ -318,6 +319,7 @@ function getServerStatus(r) {
     }
 }
 
+// e.g. set load to 25%: curl -v --header "load: 25" http://localhost:8080/setStatus
 function setServerStatus(r) {
      var serverLoad = r.headersIn.load;
 

@@ -1,7 +1,7 @@
 var querystring = require('querystring');
 var fs = require('fs');
 
-// TODO: insert the absolute path tp project
+// TODO: insert the absolute path to the project
 var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/'
 
 var LOGPATH = PROJECTPATH + 'server/logs/'
@@ -112,6 +112,7 @@ function processQueryArgs(str) {
 //
 function getResourceUsingSubrequestBBRD(r) {
     writeLog('');
+    writeLog('### get resource from: ' + getOriginIdentifier());
     writeLog('### getResourceUsingSubrequestBBRD(r) triggered: ' + r.uri);
     // writeLog('.. args: ' + r.variables.args);
 
@@ -147,7 +148,6 @@ function getResourceUsingSubrequestBBRD(r) {
         r.headersOut['CMSD-Dynamic'] = dynamicResp;
         r.headersOut['Access-Control-Expose-Headers'] = ['CMSD-Dynamic'];
         r.headersOut['CMSD-Static'] = staticResp;
-        writeLog('.. test')
         r.return(res.status, res.responseBody);
     }
 
@@ -308,6 +308,7 @@ function getBufferBasedDelay(r) {
     return delay;
 }
 
+// curl -v http://localhost:8080/getStatus
 function getServerStatus(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER1CONFIG);
@@ -318,6 +319,7 @@ function getServerStatus(r) {
     }
 }
 
+// e.g. set load to 65%: curl -v --header "load: 25" http://localhost:8080/setStatus -> after that client will switch to server2
 function setServerStatus(r) {
      var serverLoad = r.headersIn.load;
 
