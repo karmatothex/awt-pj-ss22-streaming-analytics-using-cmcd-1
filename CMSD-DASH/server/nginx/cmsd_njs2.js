@@ -6,11 +6,11 @@ var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmc
 
 var LOGPATH = PROJECTPATH + 'server/logs/'
 
-var LOGFILE = LOGPATH + 'cmsd.log';
-var CSVFILE = LOGPATH +'cmsd.csv';
-var CONFIGFILE = LOGPATH + 'cmsd_config.json';
+var LOGFILE = LOGPATH + 'cmsd2.log';
+var CSVFILE = LOGPATH +'cmsd2.csv';
+var CONFIGFILE = LOGPATH + 'cmsd_config2.json';
 
-var SERVER1CONFIG = PROJECTPATH + 'server/nginx/config/server1.json'
+var SERVER2CONFIG = PROJECTPATH + 'server/nginx/config/server2.json'
 
 function writeLog(msg) {
     var dateTime = new Date().toLocaleString();
@@ -310,7 +310,7 @@ function getBufferBasedDelay(r) {
 
 function getServerStatus(r) {
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2CONFIG);
         var jsonObj = JSON.parse(jsonStr);
         r.return(200, 'Server load is at ' + jsonObj.current_load + '%\n');
     } catch (e) {
@@ -322,7 +322,7 @@ function setServerStatus(r) {
      var serverLoad = r.headersIn.load;
 
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2CONFIG);
         var jsonObj = JSON.parse(jsonStr);
     } catch (e) {
         r.return(500, e + '\n');
@@ -331,7 +331,7 @@ function setServerStatus(r) {
     jsonObj.current_load = serverLoad;
 
     try {
-        fs.writeFileSync(SERVER1CONFIG, JSON.stringify(jsonObj));
+        fs.writeFileSync(SERVER2CONFIG, JSON.stringify(jsonObj));
         r.return(200, 'Server load is now at ' + serverLoad + '%\n'); 
     } catch (e) {
     }
@@ -339,7 +339,7 @@ function setServerStatus(r) {
 
 function getServerLoad() {
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2CONFIG);
         var jsonObj = JSON.parse(jsonStr);
         return jsonObj.current_load;
     } catch (e) {
@@ -349,7 +349,7 @@ function getServerLoad() {
 
 function getOriginIdentifier() {
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2CONFIG);
         var jsonObj = JSON.parse(jsonStr);
         return jsonObj.identifier;
     } catch (e) {
