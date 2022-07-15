@@ -2,7 +2,7 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // TODO: insert the absolute path to the project
-var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/'
+var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/'
 
 var LOGPATH = PROJECTPATH + 'server/logs/'
 
@@ -129,14 +129,21 @@ function getResourceUsingSubrequestBBRD(r) {
 
     writeLog('.. dashObjUri: ' + dashObjUri)
     writeLog('.. cmcdArgs: ' + cmcdArgs)
-    writeLog('.. r.variables.bufferBasedDelay: ' + r.variables.bufferBasedDelay2)
+    writeLog('.. r.variables.bufferBasedDelay: ' + r.variables.bufferBasedDelay)
 
     var staticResp = 'n=' + getOriginIdentifier() + ',';
-    var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay2);
+    var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
     if (getServerLoad() > 60){ //test
         writeLog("Overload occured");
         dynamicResp += ",du";
     }
+
+    var bandwithThroughput = 10000;
+    var reservedBandwith = 1000; //rest can be divided between clients
+
+    var maxBitrate = (bandwithThroughput-reservedBandwith)/getNumberOfClients();
+
+    dynamicResp += ",mb="+parseInt(maxBitrate,10).toString();
     var cmcdValuesToTake = ["st","ot","sf","v"]
     for(var value in cmcdValuesToTake){
         if(cmcdValuesToTake[value] in paramsObj){
@@ -359,7 +366,36 @@ function getOriginIdentifier() {
     }
 }
 
+function getNumberOfClients() {
+    try {
+        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonObj = JSON.parse(jsonStr);
+        return jsonObj.numOfClients;
+    } catch (e) {
+        return e;
+    }
+}
+
+
+function setNumberOfClients(r) {
+    var nClients = r.headersIn.nClients;
+
+    try {
+        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonObj = JSON.parse(jsonStr);
+    } catch (e) {
+        r.return(500, e + '\n');
+    }
+
+    jsonObj.numOfClients = nClients;
+
+    try {
+        fs.writeFileSync(SERVER1CONFIG, JSON.stringify(jsonObj));
+        r.return(200, 'Server has ' + nClients + ' clients\n');
+    } catch (e) {
+    }
+}
 
 // Note: We need to add the function to nginx.conf file too for HTTP access
-export default { getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerStatus, setServerStatus };
+export default { getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerStatus, setServerStatus, setNumberOfClients };
 

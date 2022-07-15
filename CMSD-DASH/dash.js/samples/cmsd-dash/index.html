@@ -13,18 +13,18 @@
         const UUIDGeneratorBrowser = () =>
             ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
                 (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
-        );
+            );
         const mysid = UUIDGeneratorBrowser();
 
         function getQueryParams() {
             var vars = {};
-            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,  
-                function(m,key,value) {
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
+                function (m, key, value) {
                     vars[key] = value;
                 });
             return vars;
         }
-    
+
         function init() {
             var video,
                 url = "http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/bbb_30fps_akamai/bbb_30fps.mpd",    // w/ bufferBasedResponseDelay            
@@ -34,28 +34,28 @@
                 // url = "http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd",    // w/ bufferBasedResponseDelay
                 // url = "http://localhost:8080/media/vod/BBB1sAkamai/bbb1sAkamai.mpd",  // w/o bufferBasedResponseDelay
                 version,
-                httpParams=getQueryParams(),
-                minBuffer=4,
-                maxBuffer=8;
-            
+                httpParams = getQueryParams(),
+                minBuffer = 4,
+                maxBuffer = 8;
+
             // if the vales came with query string override default ones
-            if ("videoUrl" in httpParams){
+            if ("videoUrl" in httpParams) {
                 url = httpParams["videoUrl"];
-                url=decodeURIComponent(url);
-                console.log("parsed url from query string: "+url);
+                url = decodeURIComponent(url);
+                console.log("parsed url from query string: " + url);
             }
-            if ("minBuffer" in httpParams){
-                minBuffer=httpParams["minBuffer"];
-                console.log("parsed minBuffer from query string: "+minBuffer);
+            if ("minBuffer" in httpParams) {
+                minBuffer = httpParams["minBuffer"];
+                console.log("parsed minBuffer from query string: " + minBuffer);
             }
-            if ("maxBuffer" in httpParams){
-                maxBuffer=httpParams["maxBuffer"];
-                console.log("parsed maxBuffer from query string: "+maxBuffer);
+            if ("maxBuffer" in httpParams) {
+                maxBuffer = httpParams["maxBuffer"];
+                console.log("parsed maxBuffer from query string: " + maxBuffer);
             }
 
             player = dashjs.MediaPlayer().create();
             video = document.querySelector("video");
-            player.initialize(); 
+            player.initialize();
             version = player.getVersion();
 
             player.updateSettings({
@@ -84,7 +84,7 @@
                 streaming: {
                     bufferToKeep: maxBuffer,
                     bufferTimeAtTopQuality: maxBuffer,
-		            bufferTimeAtTopQualityLongForm: maxBuffer,
+                    bufferTimeAtTopQualityLongForm: maxBuffer,
                     stableBufferTime: maxBuffer,
                     bufferPruningInterval: minBuffer // seg duration
                 }
@@ -193,84 +193,90 @@
             }
         }
 
-        setInterval(function() {
-                var dashMetrics = player.getDashMetrics();
-                var settings = player.getSettings();
+        setInterval(function () {
+            var dashMetrics = player.getDashMetrics();
+            var settings = player.getSettings();
 
-                var currentLatency = parseFloat(player.getCurrentLiveLatency(), 10);
-                document.getElementById("latency-tag").innerHTML = currentLatency + " secs";
+            var currentLatency = parseFloat(player.getCurrentLiveLatency(), 10);
+            document.getElementById("latency-tag").innerHTML = currentLatency + " secs";
 
-                var measuredThroughput = Math.round(player.getAverageThroughput("video"));
-                document.getElementById("tput-tag").innerHTML = measuredThroughput + " Kbps";
+            var measuredThroughput = Math.round(player.getAverageThroughput("video"));
+            document.getElementById("tput-tag").innerHTML = measuredThroughput + " Kbps";
 
-                // document.getElementById("mindrift-tag").innerHTML = settings.streaming.liveCatchUpMinDrift + " secs";
+            // document.getElementById("mindrift-tag").innerHTML = settings.streaming.liveCatchUpMinDrift + " secs";
 
-                var currentPlaybackRate = player.getPlaybackRate();
-                document.getElementById("playbackrate-tag").innerHTML = Math.round(currentPlaybackRate * 100) / 100;
+            var currentPlaybackRate = player.getPlaybackRate();
+            document.getElementById("playbackrate-tag").innerHTML = Math.round(currentPlaybackRate * 100) / 100;
 
-                var currentBuffer = dashMetrics.getCurrentBufferLevel("video");
-                document.getElementById("buffer-tag").innerHTML = currentBuffer + " secs";
+            var currentBuffer = dashMetrics.getCurrentBufferLevel("video");
+            document.getElementById("buffer-tag").innerHTML = currentBuffer + " secs";
 
-                document.querySelector('#rule-used-tag').innerText = ruleUsed;
-            }, 200);
+            document.querySelector('#rule-used-tag').innerText = ruleUsed;
+        }, 200);
 
-            player.on(dashjs.MediaPlayer.events.QUALITY_CHANGE_REQUESTED, (e) => {
-                console.warn('Quality changed requested', e);
-            });
+        player.on(dashjs.MediaPlayer.events.QUALITY_CHANGE_REQUESTED, (e) => {
+            console.warn('Quality changed requested', e);
+        });
 
-            player.on(dashjs.MediaPlayer.events.QUALITY_CHANGE_RENDERED, (e) => {
-                console.warn('Quality changed', e);
-                const quality = player.getBitrateInfoListFor('video')[e.newQuality];
-                if (!quality) {
-                    return;
-                }
-                document.querySelector('#quality-tag').innerText = `${quality.width}x${quality.height}, ${quality.bitrate / 1000}Kbps`;
-            });
+        player.on(dashjs.MediaPlayer.events.QUALITY_CHANGE_RENDERED, (e) => {
+            console.warn('Quality changed', e);
+            const quality = player.getBitrateInfoListFor('video')[e.newQuality];
+            if (!quality) {
+                return;
+            }
+            document.querySelector('#quality-tag').innerText = `${quality.width}x${quality.height}, ${quality.bitrate / 1000}Kbps`;
+        });
 
-            
-            player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_STARTED, (e) =>{
-                //TODO: This should help us to get rtt. Probably the data about rtt already contains in e.request
-                //A reasearch should be done
-                console.warn("Loading started!")
-                console.warn(e)
-            });
-            
-            player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => { 
-                console.warn("Fragment loaded")
-                console.warn(e)
-                //Checking, if the origin is overloaded and we have to switch to the another one
-                //TODO: also consider rtt
 
-                if (e.request.responseHeaders.includes("du")) {
-                    console.warn("...SERVER OVERLOADED...")
-                    var change_origin = window.confirm("Origin says, its overloaded. Change to another one?");
-                    if (change_origin) {
-                        var stopedAt = player.time();
-                        if (e.request.serviceLocation.includes("8080")) {
-                            console.warn(">>>Switching to the port 8090")
-                            player.attachSource("http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd"+"#t="+stopedAt.toString())
-                        } else {
-                            console.warn(">>>Switching to the port 8080")
-                            player.attachSource("http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd"+"#t="+stopedAt.toString())
-                        }
+        player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_STARTED, (e) => {
+            console.warn("Loading started!")
+            console.warn(e)
+        });
+
+        player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => {
+            console.warn("Fragment loaded")
+            console.warn(e)
+            //Checking, if the origin is overloaded and we have to switch to the another one
+            //TODO: also consider rtt
+
+            if (e.request.responseHeaders.includes("du")) {
+                console.warn("...SERVER OVERLOADED...")
+                var change_origin = window.confirm("Origin says, its overloaded. Change to another one?");
+                if (change_origin) {
+                    var stopedAt = player.time();
+                    if (e.request.serviceLocation.includes("8080")) {
+                        console.warn(">>>Switching to the port 8090")
+                        player.attachSource("http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd" + "#t=" + stopedAt.toString())
+                    } else {
+                        console.warn(">>>Switching to the port 8080")
+                        player.attachSource("http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd" + "#t=" + stopedAt.toString())
                     }
                 }
-                document.getElementById("origin-port").innerHTML =  e.request.serviceLocation.split(":")[2].split("/")[0];
+            }
+            document.getElementById("origin-port").innerHTML = e.request.serviceLocation.split(":")[2].split("/")[0];
 
-                //TODO:Here we could parse the CMSD data and adapt some metrics
-                player.updateSettings({
-                    streaming: {
-                        //Maybe we can increase buffertime for the better bandwith utilization
-                        //The idea - to load more data, while we have such an option
-                        //TODO: connect it with CMSD-etp, also CMSD-rtt?
-                        //stableBufferTime: player.getSettings().streaming.stableBufferTime * 1.1,
-                        //bufferTimeAtTopQualityLongForm: player.getSettings().streaming.bufferTimeAtTopQuality * 1.1,
-                        
-                        abr: { //this is the another point to change something, but we have to research more about abr and how it works
-                            maxBitrate:{
-                                video: 5000, //TODO: This values should be lower/equal then CMSD-mb 
-                                //Be carefull by changing it :D
-                            }
+            console.warn("response headers :")
+            console.warn(e.request.responseHeaders);
+            if (e.request.responseHeaders.includes("mb=")) {
+                mbvalue = e.request.responseHeaders.split("mb=")[1].split("\n")[0];
+
+                if (mbvalue != player.getSettings().streaming.abr.maxBitrate.video) {
+                    alert("Max-Bitrate Changed to " + mbvalue );
+
+                    //TODO:Here we could parse the CMSD data and adapt some metrics
+                    player.updateSettings({
+                        streaming: {
+                            //Maybe we can increase buffertime for the better bandwith utilization
+                            //The idea - to load more data, while we have such an option
+                            //TODO: connect it with CMSD-etp, also CMSD-rtt?
+                            //stableBufferTime: player.getSettings().streaming.stableBufferTime * 1.1,
+                            //bufferTimeAtTopQualityLongForm: player.getSettings().streaming.bufferTimeAtTopQuality * 1.1,
+
+                            abr: { //this is the another point to change something, but we have to research more about abr and how it works
+                                maxBitrate: {
+                                    video: parseInt(mbvalue), //TODO: This values should be lower/equal then CMSD-mb 
+                                    //Be carefull by changing it :D
+                                }
                             },
                             useDefaultABRRules: true,
                             ABRStrategy: 'abrThroughput',
@@ -281,18 +287,19 @@
                                 abandonRequestsRule: false
                             }
                         }
-                });
-                
-                console.warn('Fragment loading completed', e);
-                console.warn('player.getSettings().streaming', player.getSettings().streaming);
-            });
+                    });
+                }
+            }
+            console.warn('Fragment loading completed', e);
+            console.warn('player.getSettings().streaming', player.getSettings().streaming);
+        });
 
         window.startRecording = () => {
             console.info('Begin recording');
 
             const latencyCMA = CMA();
             const bufferCMA = CMA();
-            
+
             // Final results obj to be returned to run.js
             window.abrHistory = {
                 byDownload: {},
@@ -335,7 +342,7 @@
                 console.warn('Run ended. Please navigate back to node for results.');
             }
 
-            pollInterval = setInterval(function() {
+            pollInterval = setInterval(function () {
                 const currentLatency = parseFloat(player.getCurrentLiveLatency(), 10);
                 const currentBuffer = player.getDashMetrics().getCurrentBufferLevel("video");
                 history.averageLatency = latencyCMA.average(currentLatency);
@@ -346,10 +353,10 @@
             ////////////////////////////////////////////////////////////////////////////////
             // Add logging on segment download (instead of polling-based)
             ////////////////////////////////////////////////////////////////////////////////
-            player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => { 
+            player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => {
                 // Add info for QoeEvaluator in run.js
                 if (!window.abrHistory.misc.segmentDurationSec)
-                    window.abrHistory.misc.segmentDurationSec = e.request.duration; 
+                    window.abrHistory.misc.segmentDurationSec = e.request.duration;
                 if (!window.abrHistory.misc.minBitrateKbps)
                     window.abrHistory.misc.minBitrateKbps = e.request.mediaInfo.bitrateList[0].bandwidth / 1000.0;
                 if (!window.abrHistory.misc.maxBitrateKbps)
@@ -362,15 +369,15 @@
 
                 // console.log('[client] currentLatency: ' + currentLatency);
                 // console.log('[client] currentBuffer: ' + currentBuffer);
-                
+
                 history.currentLatency = currentLatency;
                 history.currentBufferLength = currentBuffer;
-                
+
                 var headers = parseResponseHeaders(e.request.responseHeaders);
-                
+
                 //basically it looks like we are not reaching this section at all
-                
-                if ('cmsd-dynamic' in headers && headers['cmsd-dynamic'].split('=')[0] == 'com.example-dl') { 
+
+                if ('cmsd-dynamic' in headers && headers['cmsd-dynamic'].split('=')[0] == 'com.example-dl') {
                     //not sure if we can split it like this in case of multiple parameters
                     history.delayDurationS = parseInt(headers['cmsd-dynamic'].split('=')[1]);
                 }
@@ -390,7 +397,7 @@
                 let currentMetrics = {};
                 // have to pass the values and not object over, otherwise the values will be updated incorrectly later (cause pass by reference?)..
                 for (let key in history) {
-                    if (history.hasOwnProperty(key)) { 
+                    if (history.hasOwnProperty(key)) {
                         // // skip adding switchRequests to each segment's metrics for better readability of result file 
                         // if (key === 'switchRequests') continue;
 
@@ -402,7 +409,7 @@
                             for (let i = 0; i < history[key].length; i++) {
                                 currentMetrics[key][i] = {};
                                 for (let key2 in history[key][i]) {
-                                    if (history[key][i].hasOwnProperty(key2))   currentMetrics[key][i][key2] = history[key][i][key2];
+                                    if (history[key][i].hasOwnProperty(key2)) currentMetrics[key][i][key2] = history[key][i][key2];
                                 }
                             }
                         }
@@ -413,7 +420,7 @@
                 const streamInfo = player.getActiveStream().getStreamInfo()
                 const isDynamic = streamInfo && streamInfo.manifestInfo ? streamInfo.manifestInfo.isDynamic : null;
                 var throughput;
-                if (typeof player.getSafeAverageThroughput === "function") { 
+                if (typeof player.getSafeAverageThroughput === "function") {
                     throughput = Math.round(player.getSafeAverageThroughput('video', isDynamic));
                 } else {
                     throughput = Math.round(player.getAverageThroughput('video'));
@@ -451,7 +458,7 @@
                     delayLoadingTime: e.request.delayLoadingTime,
                     responseHeaders: e.request.responseHeaders
                 };
-                
+
                 window.abrHistory.byDownload[segmentKey] = currentMetrics;
 
                 // constantly update overall metrics value with the latest cumulative metrics
@@ -467,19 +474,18 @@
                 if (date instanceof Date) {
                     let str = '';
 
-                    if (date.getHours() > 9)    str += date.getHours();
-                    else                        str += ('0' + date.getHours());
+                    if (date.getHours() > 9) str += date.getHours();
+                    else str += ('0' + date.getHours());
                     str += ':';
-                    if (date.getMinutes() > 9)  str += date.getMinutes();
-                    else                        str += ('0' + date.getMinutes());
+                    if (date.getMinutes() > 9) str += date.getMinutes();
+                    else str += ('0' + date.getMinutes());
                     str += ':';
-                    if (date.getSeconds() > 9)  str += date.getSeconds();
-                    else                        str += ('0' + date.getSeconds());
+                    if (date.getSeconds() > 9) str += date.getSeconds();
+                    else str += ('0' + date.getSeconds());
                     str += ('.' + date.getMilliseconds());
 
                     return str;
-                }
-                else return date;
+                } else return date;
             }
 
             function parseResponseHeaders(headerStr) {
@@ -531,7 +537,7 @@
                 if (prev) {
                     prev.end = videoNow;
                 }
-                switchHistory.push({ start: videoNow, end: null, quality });
+                switchHistory.push({start: videoNow, end: null, quality});
             }
 
             // function recordSwitchRequest(quality) {
