@@ -142,7 +142,7 @@ function getResourceUsingSubrequestBBRD(r) {
     var bandwithThroughput = 10000;
     var reservedBandwith = 1000; //rest can be divided between clients
 
-    var maxBitrate = (bandwithThroughput - reservedBandwith) / getNumberOfClients();
+    var maxBitrate = (bandwithThroughput - reservedBandwith) / getNumberOfClients_todo();
 
     dynamicResp += ",mb=" + parseInt(maxBitrate, 10).toString();
     var cmcdValuesToTake = ["st", "ot", "sf", "v"]
@@ -372,8 +372,22 @@ function getNumberOfClients(r) {
         var jsonStr = fs.readFileSync(SERVER1CONFIG);
         var jsonObj = JSON.parse(jsonStr);
         r.return(200, 'Current number of connected clients at ' + jsonObj.identifier + ': ' + jsonObj.numOfClients + '\n');
+        // return jsonObj.numOfClients;
     } catch (e) {
         r.return(500, e + '\n');
+        return e;
+    }
+}
+
+//TODO: this is so weird
+function getNumberOfClients_todo() {
+    try {
+        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonObj = JSON.parse(jsonStr);
+        return jsonObj.numOfClients;
+    } catch (e) {
+        // r.return(500, e + '\n');
+        return e;
     }
 }
 
