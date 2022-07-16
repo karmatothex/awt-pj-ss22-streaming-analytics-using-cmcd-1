@@ -154,8 +154,8 @@ function getResourceUsingSubrequestBBRD(r) {
 
     function done(res) {
         r.headersOut['CMSD-Dynamic'] = dynamicResp;
-        r.headersOut['Access-Control-Expose-Headers'] = ['CMSD-Dynamic'];
         r.headersOut['CMSD-Static'] = staticResp;
+        r.headersOut['Access-Control-Expose-Headers'] =  ['CMSD-Dynamic', 'CMSD-Static'];
         r.return(res.status, res.responseBody);
     }
 
