@@ -159,9 +159,11 @@
                     <li>Playback rate: <span id="playbackrate-tag"></span></li>
                     <li>Buffer: <b><span id="buffer-tag"></span></b></li>
                     <li>Quality: <b><span id="quality-tag"></span></b></li>
+                    <li>Bitrate limit: <b><span id="max-bitrate"></span></b></li>
                     <li>Measured throughput: <b><span id="tput-tag"></span></b></li>
                     <li>Rule used: <b><span id="rule-used-tag"></span></b></li>
-                    <li>Origin port: <b><span id="origin-port"></span></b></li>
+                    <li>Session-Id: <b><span id="session-id"></span></b></li>
+                    <li>Origin: <b><span id="origin"></span></b></li>
                 </ul>
                 <div id="stats"></div>
             </fieldset>
@@ -225,6 +227,11 @@
                 return;
             }
             document.querySelector('#quality-tag').innerText = `${quality.width}x${quality.height}, ${quality.bitrate / 1000}Kbps`;
+
+            document.querySelector('#session-id').innerHTML = player.getSettings().streaming.cmcd.sid;
+            document.querySelector('#max-bitrate').innerHTML = player.getSettings().streaming.abr.maxBitrate.video.toString();
+
+
         });
 
 
@@ -238,7 +245,12 @@
             console.warn(e)
             //Checking, if the origin is overloaded and we have to switch to the another one
             //TODO: also consider rtt
+            if (e.request.responseHeaders.includes("n=")){
+                document.getElementById("origin").innerHTML = e.request.responseHeaders.split("n=")[1].split(",")[0];
 
+            }
+            
+            
             if (e.request.responseHeaders.includes("du")) {
                 console.warn("...SERVER OVERLOADED...")
                 var change_origin = window.confirm("Origin says, its overloaded. Change to another one?");
@@ -253,7 +265,6 @@
                     }
                 }
             }
-            document.getElementById("origin-port").innerHTML = e.request.serviceLocation.split(":")[2].split("/")[0];
 
             console.warn("response headers :")
             console.warn(e.request.responseHeaders);
@@ -261,8 +272,6 @@
                 mbvalue = e.request.responseHeaders.split("mb=")[1].split("\n")[0];
 
                 if (mbvalue != player.getSettings().streaming.abr.maxBitrate.video) {
-                    alert("Max-Bitrate Changed to " + mbvalue );
-
                     //TODO:Here we could parse the CMSD data and adapt some metrics
                     player.updateSettings({
                         streaming: {
@@ -288,6 +297,7 @@
                             }
                         }
                     });
+
                 }
             }
             console.warn('Fragment loading completed', e);
