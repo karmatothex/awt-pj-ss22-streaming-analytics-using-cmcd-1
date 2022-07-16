@@ -375,7 +375,6 @@ function getNumberOfClients(r) {
         // return jsonObj.numOfClients;
     } catch (e) {
         r.return(500, e + '\n');
-        return e;
     }
 }
 
