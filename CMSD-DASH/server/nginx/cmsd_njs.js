@@ -3,7 +3,7 @@ var fs = require('fs');
 
 // TODO: insert the absolute path to the project
 // var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
-var PROJECTPATH =  '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 
 var LOGPATH = PROJECTPATH + 'server/logs/';
 
@@ -11,7 +11,7 @@ var LOGFILE = LOGPATH + 'cmsd.log';
 var CSVFILE = LOGPATH + 'cmsd.csv';
 var CONFIGFILE = LOGPATH + 'cmsd_config.json';
 
-var SERVER1CONFIG = PROJECTPATH + 'server/nginx/config/server1.json'
+var SERVER1INFO = PROJECTPATH + 'server/nginx/config/server1.json'
 
 function writeLog(msg) {
     var dateTime = new Date().toLocaleString();
@@ -313,13 +313,17 @@ function getBufferBasedDelay(r) {
     metricsObj['delayForThisReq'] = delay
 
     writeCsv(metricsObj);
+
+    // cache sid
+    cacheSessionId(r, paramsObj);
+
     return delay;
 }
 
 // curl -v http://localhost:8080/getStatus
 function getServerStatus(r) {
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
         r.return(200, 'Load from ' + jsonObj.identifier + ' is at ' + jsonObj.current_load + '%\n');
     } catch (e) {
@@ -332,7 +336,7 @@ function setServerStatus(r) {
     var serverLoad = r.headersIn.load;
 
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
     } catch (e) {
         r.return(500, e + '\n');
@@ -341,7 +345,7 @@ function setServerStatus(r) {
     jsonObj.current_load = serverLoad;
 
     try {
-        fs.writeFileSync(SERVER1CONFIG, JSON.stringify(jsonObj));
+        fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
         r.return(200, 'The load from ' + jsonObj.identifier + ' is now at ' + serverLoad + '%\n');
     } catch (e) {
     }
@@ -349,7 +353,7 @@ function setServerStatus(r) {
 
 function getServerLoad() {
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
         return jsonObj.current_load;
     } catch (e) {
@@ -359,7 +363,7 @@ function getServerLoad() {
 
 function getOriginIdentifier() {
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
         return jsonObj.identifier;
     } catch (e) {
@@ -369,7 +373,7 @@ function getOriginIdentifier() {
 
 function getNumberOfClients(r) {
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
         r.return(200, 'Current number of connected clients at ' + jsonObj.identifier + ': ' + jsonObj.numOfClients + '\n');
         // return jsonObj.numOfClients;
@@ -381,7 +385,7 @@ function getNumberOfClients(r) {
 //TODO: this is so weird
 function getNumberOfClients_todo() {
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
         return jsonObj.numOfClients;
     } catch (e) {
@@ -394,7 +398,7 @@ function setNumberOfClients(r) {
     var nClients = r.headersIn.nClients;
 
     try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
     } catch (e) {
         r.return(500, e + '\n');
@@ -403,12 +407,44 @@ function setNumberOfClients(r) {
     jsonObj.numOfClients = nClients;
 
     try {
-        fs.writeFileSync(SERVER1CONFIG, JSON.stringify(jsonObj));
+        fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
         r.return(200, 'Current number of connected clients at ' + jsonObj.identifier + ' set to: ' + nClients + '\n');
     } catch (e) {
     }
 }
 
+function cacheSessionId(r, paramsObj) {
+    // var paramsObj = processQueryArgs(r.variables.query_string);
+    var sid = ''
+    if ('sid' in paramsObj) { sid = paramsObj['sid']; }
+
+    try {
+        var jsonStr = fs.readFileSync(SERVER1INFO);
+        var jsonObj = JSON.parse(jsonStr);
+    } catch (e) {
+    }
+
+    if (!jsonObj.activeSessions.includes(sid)) {
+        jsonObj.activeSessions.push(sid);
+    }
+
+    try {
+        fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
+        // r.return(200, 'Set sid to ' + sid + '\n');
+    } catch (e) {
+    }
+}
+function getServerInfo(r) {
+    try {
+        var jsonStr = fs.readFileSync(SERVER1INFO);
+        var jsonObj = JSON.parse(jsonStr);
+        r.return(200, 'Current metrics on ' + jsonObj.identifier + ': ' + jsonStr+ '\n');
+        // return jsonObj.numOfClients;
+    } catch (e) {
+        r.return(500, e + '\n');
+    }
+}
+
 // Note: We need to add the function to nginx.conf file too for HTTP access
-export default { getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerStatus, setServerStatus, getNumberOfClients, setNumberOfClients };
+export default { getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerStatus, setServerStatus, getNumberOfClients, setNumberOfClients, cacheSessionId, getServerInfo };
 

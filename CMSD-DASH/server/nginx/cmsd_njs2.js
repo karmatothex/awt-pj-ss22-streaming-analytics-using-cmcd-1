@@ -11,7 +11,7 @@ var LOGFILE = LOGPATH + 'cmsd2.log';
 var CSVFILE = LOGPATH + 'cmsd2.csv';
 var CONFIGFILE = LOGPATH + 'cmsd_config2.json';
 
-var SERVER2CONFIG = PROJECTPATH + 'server/nginx/config/server2.json'
+var SERVER2INFO = PROJECTPATH + 'server/nginx/config/server2.json'
 
 function writeLog(msg) {
     var dateTime = new Date().toLocaleString();
@@ -130,10 +130,10 @@ function getResourceUsingSubrequestBBRD(r) {
 
     writeLog('.. dashObjUri: ' + dashObjUri)
     writeLog('.. cmcdArgs: ' + cmcdArgs)
-    writeLog('.. r.variables.bufferBasedDelay: ' + r.variables.bufferBasedDelay)
+    writeLog('.. r.variables.bufferBasedDelay: ' + r.variables.bufferBasedDelay2)
 
     var staticResp = 'n=' + getOriginIdentifier() + ',';
-    var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
+    var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay2);
     if (getServerLoad() > 60) { //test
         writeLog("Overload occured");
         dynamicResp += ",du";
@@ -319,7 +319,7 @@ function getBufferBasedDelay(r) {
 // curl -v http://localhost:8080/getStatus
 function getServerStatus(r) {
     try {
-        var jsonStr = fs.readFileSync(SERVER2CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
         r.return(200, 'Load from ' + jsonObj.identifier + ' is at ' + jsonObj.current_load + '%\n');
     } catch (e) {
@@ -332,7 +332,7 @@ function setServerStatus(r) {
     var serverLoad = r.headersIn.load;
 
     try {
-        var jsonStr = fs.readFileSync(SERVER2CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
     } catch (e) {
         r.return(500, e + '\n');
@@ -341,7 +341,7 @@ function setServerStatus(r) {
     jsonObj.current_load = serverLoad;
 
     try {
-        fs.writeFileSync(SERVER2CONFIG, JSON.stringify(jsonObj));
+        fs.writeFileSync(SERVER2INFO, JSON.stringify(jsonObj));
         r.return(200, 'Server load is now at ' + serverLoad + '%\n');
     } catch (e) {
     }
@@ -349,7 +349,7 @@ function setServerStatus(r) {
 
 function getServerLoad() {
     try {
-        var jsonStr = fs.readFileSync(SERVER2CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
         return jsonObj.current_load;
     } catch (e) {
@@ -359,7 +359,7 @@ function getServerLoad() {
 
 function getOriginIdentifier() {
     try {
-        var jsonStr = fs.readFileSync(SERVER2CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
         return jsonObj.identifier;
     } catch (e) {
@@ -369,7 +369,7 @@ function getOriginIdentifier() {
 
 function getNumberOfClients(r) {
     try {
-        var jsonStr = fs.readFileSync(SERVER2CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
         r.return(200, 'Current number of connected clients at ' + jsonObj.identifier + ': ' + jsonObj.numOfClients + '\n');
         // return jsonObj.numOfClients;
@@ -381,7 +381,7 @@ function getNumberOfClients(r) {
 //TODO: this is so weird
 function getNumberOfClients_todo() {
     try {
-        var jsonStr = fs.readFileSync(SERVER2CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
         return jsonObj.numOfClients;
     } catch (e) {
@@ -394,7 +394,7 @@ function setNumberOfClients(r) {
     var nClients = r.headersIn.nClients;
 
     try {
-        var jsonStr = fs.readFileSync(SERVER2CONFIG);
+        var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
     } catch (e) {
         r.return(500, e + '\n');
@@ -403,7 +403,7 @@ function setNumberOfClients(r) {
     jsonObj.numOfClients = nClients;
 
     try {
-        fs.writeFileSync(SERVER2CONFIG, JSON.stringify(jsonObj));
+        fs.writeFileSync(SERVER2INFO, JSON.stringify(jsonObj));
         r.return(200, 'Current number of connected clients at ' + jsonObj.identifier + ' set to: ' + nClients + '\n');
     } catch (e) {
     }
