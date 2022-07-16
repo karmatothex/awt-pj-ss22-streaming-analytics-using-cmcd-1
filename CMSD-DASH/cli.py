@@ -22,6 +22,7 @@ stop_server = "sudo killall nginx"
 get_nginx_status = "sudo systemctl status nginx"
 get_nginx_active_con_1 = "curl http://localhost:8080/nginx_status"
 get_nginx_active_con_2 = "curl http://localhost:8090/nginx_status"
+reset_active_sessions = "curl http://localhost:8080/resetSessions"
 
 
 def run_command(command: str):
@@ -170,6 +171,8 @@ def main():
             run_command(run_server)
         if uc == 2:
             run_command(reload_server)
+            run_command(reset_active_sessions)
+            # maybe also kill all chrome
         if uc == 3:
             run_command(restart_server)
         if uc == 4:

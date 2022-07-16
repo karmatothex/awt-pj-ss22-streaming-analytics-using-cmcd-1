@@ -142,7 +142,7 @@ function getResourceUsingSubrequestBBRD(r) {
     var bandwithThroughput = 10000;
     var reservedBandwith = 1000; //rest can be divided between clients
 
-    var maxBitrate = (bandwithThroughput - reservedBandwith) / getNumberOfClients_todo();
+    var maxBitrate = (bandwithThroughput - reservedBandwith) / getNumberOfClients_intern;
 
     dynamicResp += ",mb=" + parseInt(maxBitrate, 10).toString();
     var cmcdValuesToTake = ["st", "ot", "sf", "v"]
@@ -313,6 +313,10 @@ function getBufferBasedDelay(r) {
     metricsObj['delayForThisReq'] = delay
 
     writeCsv(metricsObj);
+
+    // cache sid
+    cacheSessionId(paramsObj);
+
     return delay;
 }
 
@@ -378,8 +382,7 @@ function getNumberOfClients(r) {
     }
 }
 
-//TODO: this is so weird
-function getNumberOfClients_todo() {
+function getNumberOfClients_intern() {
     try {
         var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
@@ -409,6 +412,54 @@ function setNumberOfClients(r) {
     }
 }
 
-// Note: We need to add the function to nginx.conf file too for HTTP access
-export default { getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerStatus, setServerStatus, getNumberOfClients, setNumberOfClients };
+function cacheSessionId(paramsObj) {
+    // var paramsObj = processQueryArgs(r.variables.query_string);
+    var sid = ''
+    if ('sid' in paramsObj) { sid = paramsObj['sid']; }
 
+    try {
+        var jsonStr = fs.readFileSync(SERVER2INFO);
+        var jsonObj = JSON.parse(jsonStr);
+    } catch (e) {
+    }
+
+    if (!jsonObj.activeSessions.includes(sid)) {
+        jsonObj.activeSessions.push(sid);
+    }
+
+    try {
+        fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
+        // r.return(200, 'Set sid to ' + sid + '\n');
+    } catch (e) {
+    }
+}
+
+function resetSessions(r) {
+    try {
+        var jsonStr = fs.readFileSync(SERVER1INFO);
+        var jsonObj = JSON.parse(jsonStr);
+    } catch (e) {
+    }
+
+    jsonObj.activeSessions = [];
+
+    try {
+        fs.writeFileSync(SERVER2INFO, JSON.stringify(jsonObj));
+        r.return(200, 'Reset active sessions on ' + jsonObj.identifier + '\n');
+    } catch (e) {
+    }
+}
+
+function getServerInfo(r) {
+    try {
+        var jsonStr = fs.readFileSync(SERVER2INFO);
+        var jsonObj = JSON.parse(jsonStr);
+        r.return(200, 'Current metrics on ' + jsonObj.identifier + ': ' + jsonStr+ '\n');
+    } catch (e) {
+        r.return(500, e + '\n');
+    }
+}
+
+// Note: We need to add the function to nginx.conf file too for HTTP access
+export default { getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerStatus, setServerStatus, getNumberOfClients, setNumberOfClients, 
+    cacheSessionId, resetSessions, getServerInfo };
