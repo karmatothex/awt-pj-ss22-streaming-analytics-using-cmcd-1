@@ -2,12 +2,13 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // TODO: insert the absolute path to the project
-var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/'
+// var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+var PROJECTPATH =  '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 
-var LOGPATH = PROJECTPATH + 'server/logs/'
+var LOGPATH = PROJECTPATH + 'server/logs/';
 
 var LOGFILE = LOGPATH + 'cmsd.log';
-var CSVFILE = LOGPATH +'cmsd.csv';
+var CSVFILE = LOGPATH + 'cmsd.csv';
 var CONFIGFILE = LOGPATH + 'cmsd_config.json';
 
 var SERVER1CONFIG = PROJECTPATH + 'server/nginx/config/server1.json'
@@ -96,14 +97,14 @@ function processQueryArgs(str) {
         if (paramsArr[i].includes('=')) {
             var key = paramsArr[i].split('=')[0];
             var value = paramsArr[i].split('=')[1];
-        } 
+        }
         else {  // e.g. `bs` key does not have a value in CMCD query arg format
             var key = paramsArr[i];
             var value = 'true';
         }
         paramsObj[key] = value;
     }
-    
+
     return paramsObj;
 }
 
@@ -133,7 +134,7 @@ function getResourceUsingSubrequestBBRD(r) {
 
     var staticResp = 'n=' + getOriginIdentifier() + ',';
     var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
-    if (getServerLoad() > 60){ //test
+    if (getServerLoad() > 60) { //test
         writeLog("Overload occured");
         dynamicResp += ",du";
     }
@@ -141,12 +142,12 @@ function getResourceUsingSubrequestBBRD(r) {
     var bandwithThroughput = 10000;
     var reservedBandwith = 1000; //rest can be divided between clients
 
-    var maxBitrate = (bandwithThroughput-reservedBandwith)/getNumberOfClients();
+    var maxBitrate = (bandwithThroughput - reservedBandwith) / getNumberOfClients();
 
-    dynamicResp += ",mb="+parseInt(maxBitrate,10).toString();
-    var cmcdValuesToTake = ["st","ot","sf","v"]
-    for(var value in cmcdValuesToTake){
-        if(cmcdValuesToTake[value] in paramsObj){
+    dynamicResp += ",mb=" + parseInt(maxBitrate, 10).toString();
+    var cmcdValuesToTake = ["st", "ot", "sf", "v"]
+    for (var value in cmcdValuesToTake) {
+        if (cmcdValuesToTake[value] in paramsObj) {
             staticResp += (cmcdValuesToTake[value] + "=" + paramsObj[cmcdValuesToTake[value]] + ",")
         }
     }
@@ -201,23 +202,23 @@ function getBufferBasedDelay(r) {
     var delay;
     var bMin = Number(paramsObj['com.example-bmn']);
     var bMax = Number(paramsObj['com.example-bmx']);
-    
+
     writeLog('.. bMin = ' + bMin + '.. bMax = ' + bMax);
     metricsObj['bufferMin'] = bMin
     metricsObj['bufferMax'] = bMax
 
     var bufferLength;
     writeLog(".. metricsObj['did']: " + metricsObj['did']);
-    writeLog(".. " + (metricsObj['did'].indexOf( 'dash.js-v4.2.1' ) > -1))
-    if (metricsObj['did'].indexOf( 'dash.js-v4.2.1' ) > -1) {        // v4.2.1 uses ms; convert to s
+    writeLog(".. " + (metricsObj['did'].indexOf('dash.js-v4.2.1') > -1))
+    if (metricsObj['did'].indexOf('dash.js-v4.2.1') > -1) {        // v4.2.1 uses ms; convert to s
         bufferLength = Number(paramsObj['bl']) / 1000;
-    }  
+    }
     else {                                               // v3.1.3 uses seconds
         bufferLength = Number(paramsObj['bl']);
     }
     writeLog('.. bl = ' + bufferLength)
     metricsObj['bufferLength'] = bufferLength;
-    
+
     var nextBitrate = Number(paramsObj['br']);
     var segDuration = Number(paramsObj['d']) / 1000;    // convert ms to s
     var measuredTput = Number(paramsObj['mtp']);
@@ -229,9 +230,9 @@ function getBufferBasedDelay(r) {
 
     // Retrieve $lastRecordedDelay in nginx.conf and compute delay to be applied
     var lastRecordedDelay = readConfig('lastRecordedDelay')
-    if (lastRecordedDelay == null)    lastRecordedDelay = 0
+    if (lastRecordedDelay == null) lastRecordedDelay = 0
     var lastRecordedDelayTimestamp = readConfig('lastRecordedDelayTimestamp')
-    if (lastRecordedDelayTimestamp == null)    lastRecordedDelayTimestamp = 0
+    if (lastRecordedDelayTimestamp == null) lastRecordedDelayTimestamp = 0
 
     writeLog('.. lastRecordedDelay = ' + lastRecordedDelay + 's, lastRecordedDelayTimestamp = ' + lastRecordedDelayTimestamp + 's');
     metricsObj['lastRecordedDelay'] = lastRecordedDelay
@@ -246,12 +247,12 @@ function getBufferBasedDelay(r) {
     metricsObj['currentDelay'] = currentDelay
 
     var expectedSegDownloadTime = (nextBitrate * segDuration) / measuredTput;
-    var expectedBufferLengthAfterDelayedDownload =  Math.max(0, bufferLength - expectedSegDownloadTime - currentDelay);
+    var expectedBufferLengthAfterDelayedDownload = Math.max(0, bufferLength - expectedSegDownloadTime - currentDelay);
 
     writeLog('.. expectedSegDownloadTime = ' + expectedSegDownloadTime + 's, expectedBufferLengthAfterDelayedDownload = ' + expectedBufferLengthAfterDelayedDownload + 's');
     metricsObj['expectedSegDownloadTime'] = expectedSegDownloadTime
     metricsObj['expectedBufferLengthAfterDelayedDownload'] = expectedBufferLengthAfterDelayedDownload
-    
+
     //
     // Case 1: Client is critical; update $lastRecordedDelay in nginx.conf and return delay=0 for this client
     // ($lastRecordedDelay will be retrieved by all other non-critical clients)
@@ -259,7 +260,7 @@ function getBufferBasedDelay(r) {
     if (bufferLength < bMin) {
         writeLog('[case1] Critical client found !!');
         metricsObj['case'] = '1-critical'
-        
+
         // var segSize = nextBitrate * segDuration;
         // var newDelay = segSize / measuredTput;  // Computed as expected segment download duration
         var newDelay = expectedSegDownloadTime;
@@ -282,7 +283,7 @@ function getBufferBasedDelay(r) {
         metricsObj['delayUpdateToConfig'] = -1          // Add to metrics logging file
         metricsObj['delayTimestampUpdateToConfig'] = -1
     }
-    
+
     //
     // Case 2: Client is in surplus; apply delay
     //
@@ -290,8 +291,8 @@ function getBufferBasedDelay(r) {
         writeLog('[case2] Surplus client found, bufferLength: ' + bufferLength);
         metricsObj['case'] = '2-surplus'
         metricsObj['delayUpdateToConfig'] = -1
-    // else if (expectedBufferLengthAfterDelayedDownload > bMax) {
-    //     writeLog('[case2] Surplus client found, expectedBufferLengthAfterDelayedDownload: ' + expectedBufferLengthAfterDelayedDownload);
+        // else if (expectedBufferLengthAfterDelayedDownload > bMax) {
+        //     writeLog('[case2] Surplus client found, expectedBufferLengthAfterDelayedDownload: ' + expectedBufferLengthAfterDelayedDownload);
         delay = Math.max(0, currentDelay);
     }
 
@@ -300,14 +301,14 @@ function getBufferBasedDelay(r) {
         writeLog('[case3] Normal client found, bufferLength: ' + bufferLength);
         metricsObj['case'] = '3-normal'
         metricsObj['delayUpdateToConfig'] = -1
-    // else if (expectedBufferLengthAfterDelayedDownload >= bMin) {
-    //     writeLog('[case3] Normal client found, expectedBufferLengthAfterDelayedDownload: ' + expectedBufferLengthAfterDelayedDownload);
+        // else if (expectedBufferLengthAfterDelayedDownload >= bMin) {
+        //     writeLog('[case3] Normal client found, expectedBufferLengthAfterDelayedDownload: ' + expectedBufferLengthAfterDelayedDownload);
         // delay = 0.5 * currentDelay;
-        
+
         var bRange = bMax - bMin;
         delay = Math.max(0, Math.round((((bufferLength - bMin) / bRange) * currentDelay), 2));
     }
-    
+
     writeLog('Serving current client with delay = ' + delay + ' s!');
     metricsObj['delayForThisReq'] = delay
 
@@ -320,7 +321,7 @@ function getServerStatus(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER1CONFIG);
         var jsonObj = JSON.parse(jsonStr);
-        r.return(200, 'Server load is at ' + jsonObj.current_load + '%\n');
+        r.return(200, 'Load from ' + jsonObj.identifier + ' is at ' + jsonObj.current_load + '%\n');
     } catch (e) {
         r.return(500, e + '\n');
     }
@@ -328,7 +329,7 @@ function getServerStatus(r) {
 
 // e.g. set load to 65%: curl -v --header "load: 25" http://localhost:8080/setStatus -> after that client will switch to server2
 function setServerStatus(r) {
-     var serverLoad = r.headersIn.load;
+    var serverLoad = r.headersIn.load;
 
     try {
         var jsonStr = fs.readFileSync(SERVER1CONFIG);
@@ -341,7 +342,7 @@ function setServerStatus(r) {
 
     try {
         fs.writeFileSync(SERVER1CONFIG, JSON.stringify(jsonObj));
-        r.return(200, 'Server load is now at ' + serverLoad + '%\n'); 
+        r.return(200, 'The load from ' + jsonObj.identifier + ' is now at ' + serverLoad + '%\n');
     } catch (e) {
     }
 }
@@ -356,17 +357,25 @@ function getServerLoad() {
     }
 }
 
-
-function getNumberOfClients() {
+function getOriginIdentifier() {
     try {
         var jsonStr = fs.readFileSync(SERVER1CONFIG);
         var jsonObj = JSON.parse(jsonStr);
-        return jsonObj.numOfClients;
+        return jsonObj.identifier;
     } catch (e) {
         return e;
     }
 }
 
+function getNumberOfClients(r) {
+    try {
+        var jsonStr = fs.readFileSync(SERVER1CONFIG);
+        var jsonObj = JSON.parse(jsonStr);
+        r.return(200, 'Current number of connected clients at ' + jsonObj.identifier + ': ' + jsonObj.numOfClients + '\n');
+    } catch (e) {
+        r.return(500, e + '\n');
+    }
+}
 
 function setNumberOfClients(r) {
     var nClients = r.headersIn.nClients;
@@ -382,23 +391,11 @@ function setNumberOfClients(r) {
 
     try {
         fs.writeFileSync(SERVER1CONFIG, JSON.stringify(jsonObj));
-        r.return(200, 'Server has ' + nClients + ' clients\n');
+        r.return(200, 'Current number of connected clients at ' + jsonObj.identifier + ' set to: ' + nClients + '\n');
     } catch (e) {
     }
 }
-
-
-function getOriginIdentifier() {
-    try {
-        var jsonStr = fs.readFileSync(SERVER1CONFIG);
-        var jsonObj = JSON.parse(jsonStr);
-        return jsonObj.identifier;
-    } catch (e) {
-        return e;
-    }
-}
-
 
 // Note: We need to add the function to nginx.conf file too for HTTP access
-export default { getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerStatus, setServerStatus, setNumberOfClients };
+export default { getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerStatus, setServerStatus, getNumberOfClients, setNumberOfClients };
 

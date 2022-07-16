@@ -19,3 +19,5 @@ CMSD-DASH/dash-test/results/
 CMSD-DASH/dash-test/tc-network-profiles/log/
 
 CMSD-DASH/server/logs/*
+
+CMSD-DASH/venv/

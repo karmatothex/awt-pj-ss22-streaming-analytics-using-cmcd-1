@@ -21,14 +21,14 @@ VIDEOCOMMENT="Akamai video, minBuf:4s maxBuf:8s"
 # NO_CMCD #
 
 ## Update package.json
-sudo jq -c '.config.client_profile = "./client_profile_join_test_no_cmcd"' package.json > tmp.$$.json && mv tmp.$$.json package.json
-sudo jq -c '.config.network_profile = "'$PROFILE'"' package.json > tmp.$$.json && mv tmp.$$.json package.json
+# sudo jq -c '.config.client_profile = "./client_profile_join_test_no_cmcd"' package.json > tmp.$$.json && mv tmp.$$.json package.json
+# sudo jq -c '.config.network_profile = "'$PROFILE'"' package.json > tmp.$$.json && mv tmp.$$.json package.json
 
-for (( c=1; c<=$NUMRUNS; c++ ))
-do
-    sudo bash tc-network-profiles/kill.sh
-    echo "${PROFILE}. no_cmcd. ${VIDEOCOMMENT}. run $c." | sudo npm run test-multiple-clients
-done
+# for (( c=1; c<=$NUMRUNS; c++ ))
+# do
+#     sudo bash tc-network-profiles/kill.sh
+#     echo "${PROFILE}. no_cmcd. ${VIDEOCOMMENT}. run $c." | sudo npm run test-multiple-clients
+# done
 
 
 # WITH_CMCD #
