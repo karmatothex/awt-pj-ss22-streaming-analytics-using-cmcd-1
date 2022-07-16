@@ -2,8 +2,8 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // TODO: insert the absolute path to the project
-// var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
-var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+ var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+//var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 
 var LOGPATH = PROJECTPATH + 'server/logs/';
 
@@ -135,14 +135,19 @@ function getResourceUsingSubrequestBBRD(r) {
     var staticResp = 'n=' + getOriginIdentifier() + ',';
     var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
     if (getServerLoad() > 60) { //test
+        //sid
         writeLog("Overload occured");
         dynamicResp += ",du";
+
     }
 
     var bandwithThroughput = 10000;
     var reservedBandwith = 1000; //rest can be divided between clients
 
-    var maxBitrate = (bandwithThroughput - reservedBandwith) / getNumberOfClients_intern;
+    var numc =getNumberOfClients_intern();
+    if(numc == 0)
+        numc = 1;
+    var maxBitrate = (bandwithThroughput - reservedBandwith) / numc;
 
     dynamicResp += ",mb=" + parseInt(maxBitrate, 10).toString();
     var cmcdValuesToTake = ["st", "ot", "sf", "v"]
@@ -386,7 +391,7 @@ function getNumberOfClients_intern() {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
-        return jsonObj.numOfClients;
+        return jsonObj.activeSessions.length;
     } catch (e) {
         // r.return(500, e + '\n');
         return e;
@@ -419,6 +424,8 @@ function cacheSessionId(paramsObj) {
 
     var sid2 = sid.replace(/"/g, "");
 
+    var sid2 = sid.replace(/"/g, '');
+
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
@@ -435,6 +442,7 @@ function cacheSessionId(paramsObj) {
     } catch (e) {
     }
 }
+
 
 function resetSessions(r) {
     try {
@@ -456,7 +464,7 @@ function getServerInfo(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
-        r.return(200, 'Current metrics on ' + jsonObj.identifier + ': ' + jsonStr+ '\n');
+        r.return(200, jsonStr);
     } catch (e) {
         r.return(500, e + '\n');
     }
