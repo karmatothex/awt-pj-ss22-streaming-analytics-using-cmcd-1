@@ -14,11 +14,14 @@ banner = """
 project_path = "/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
 #project_path = "/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
 
+# nginx commands
 run_server = "sudo nginx -c" + project_path + "CMSD-DASH/server/nginx/config/nginx.conf"
 reload_server = run_server + " -s reload"
+restart_server = "sudo service nginx restart"
 stop_server = "sudo killall nginx"
-get_nginx_status_1 = "curl http://localhost:8080/nginx_status"
-get_nginx_status_2 = "curl http://localhost:8090/nginx_status"
+get_nginx_status = "sudo systemctl status nginx"
+get_nginx_active_con_1 = "curl http://localhost:8080/nginx_status"
+get_nginx_active_con_2 = "curl http://localhost:8090/nginx_status"
 
 
 def run_command(command: str):
@@ -39,9 +42,12 @@ def print_options():
     print(">>> Options")
     print("1) Start servers")
     print("2) Reload server config")
-    print("3) Stop all servers")
-    print("4) Get nginx status")
-    print("5) Choose server")
+    print("3) Restart servers")
+    print("4) Stop all servers")
+    print("5) Get nginx status")
+    print("6) Get info about active connections")
+    print("7) Choose server")
+    print("8) Clear screen")
 
 
 def choose_a_server(max_choice: int):
@@ -159,19 +165,23 @@ def main():
 
     while(True):
         print_options()
-        uc = get_user_choice(5)
+        uc = get_user_choice(8)
         if uc == 1:
             run_command(run_server)
         if uc == 2:
             run_command(reload_server)
         if uc == 3:
-            run_command(stop_server)
+            run_command(restart_server)
         if uc == 4:
-            print("For Server 1:\n")
-            run_command(get_nginx_status_1)
-            print("For Server 2:\n")
-            run_command(get_nginx_status_2)
+            run_command(stop_server)
         if uc == 5:
+            run_command(get_nginx_status)
+        if uc == 6:
+            print("For Server 1:\n")
+            run_command(get_nginx_active_con_1)
+            print("For Server 2:\n")
+            run_command(get_nginx_active_con_2)
+        if uc == 7:
             sc = choose_a_server(2)
             server = ""
             if sc == 1:
@@ -191,6 +201,9 @@ def main():
                     set_new_num_clients(server)
                 elif uc == 5:
                     main()
+        if uc == 8:
+            main()
+
 
 
 if __name__ == "__main__":
