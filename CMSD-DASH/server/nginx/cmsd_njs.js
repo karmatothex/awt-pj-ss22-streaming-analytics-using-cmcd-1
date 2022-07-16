@@ -417,14 +417,16 @@ function cacheSessionId(paramsObj) {
     var sid = ''
     if ('sid' in paramsObj) { sid = paramsObj['sid']; }
 
+    var sid2 = sid.replace(/"/g, "");
+
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
     } catch (e) {
     }
 
-    if (!jsonObj.activeSessions.includes(sid)) {
-        jsonObj.activeSessions.push(sid);
+    if (!jsonObj.activeSessions.includes(sid2)) {
+        jsonObj.activeSessions.push(sid2);
     }
 
     try {
