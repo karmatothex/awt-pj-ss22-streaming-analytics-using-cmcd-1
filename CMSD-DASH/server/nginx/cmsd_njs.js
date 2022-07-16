@@ -134,7 +134,7 @@ function getResourceUsingSubrequestBBRD(r) {
 
     var staticResp = 'n=' + getOriginIdentifier() + ',';
     var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
-    if (getServerLoad() > 60) { //test
+    if (getServerLoad_intern() > 60) { //test
         writeLog("Overload occured");
         dynamicResp += ",du";
     }
@@ -142,7 +142,7 @@ function getResourceUsingSubrequestBBRD(r) {
     var bandwithThroughput = 10000;
     var reservedBandwith = 1000; //rest can be divided between clients
 
-    var maxBitrate = (bandwithThroughput - reservedBandwith) / getNumberOfClients_intern;
+    var maxBitrate = (bandwithThroughput - reservedBandwith) / getNumberOfClients_intern();
 
     dynamicResp += ",mb=" + parseInt(maxBitrate, 10).toString();
     var cmcdValuesToTake = ["st", "ot", "sf", "v"]
@@ -155,7 +155,7 @@ function getResourceUsingSubrequestBBRD(r) {
     function done(res) {
         r.headersOut['CMSD-Dynamic'] = dynamicResp;
         r.headersOut['CMSD-Static'] = staticResp;
-        r.headersOut['Access-Control-Expose-Headers'] =  ['CMSD-Dynamic', 'CMSD-Static'];
+        r.headersOut['Access-Control-Expose-Headers'] = ['CMSD-Dynamic', 'CMSD-Static'];
         r.return(res.status, res.responseBody);
     }
 
@@ -321,7 +321,7 @@ function getBufferBasedDelay(r) {
 }
 
 // curl -v http://localhost:8080/getStatus
-function getServerStatus(r) {
+function getServerLoad(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
@@ -331,27 +331,7 @@ function getServerStatus(r) {
     }
 }
 
-// e.g. set load to 65%: curl -v --header "load: 25" http://localhost:8080/setStatus -> after that client will switch to server2
-function setServerStatus(r) {
-    var serverLoad = r.headersIn.load;
-
-    try {
-        var jsonStr = fs.readFileSync(SERVER1INFO);
-        var jsonObj = JSON.parse(jsonStr);
-    } catch (e) {
-        r.return(500, e + '\n');
-    }
-
-    jsonObj.current_load = serverLoad;
-
-    try {
-        fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
-        r.return(200, 'The load from ' + jsonObj.identifier + ' is now at ' + serverLoad + '%\n');
-    } catch (e) {
-    }
-}
-
-function getServerLoad() {
+function getServerLoad_intern() {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
@@ -393,25 +373,6 @@ function getNumberOfClients_intern() {
     }
 }
 
-function setNumberOfClients(r) {
-    var nClients = r.headersIn.nClients;
-
-    try {
-        var jsonStr = fs.readFileSync(SERVER1INFO);
-        var jsonObj = JSON.parse(jsonStr);
-    } catch (e) {
-        r.return(500, e + '\n');
-    }
-
-    jsonObj.numOfClients = nClients;
-
-    try {
-        fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
-        r.return(200, 'Current number of connected clients at ' + jsonObj.identifier + ' set to: ' + nClients + '\n');
-    } catch (e) {
-    }
-}
-
 function cacheSessionId(paramsObj) {
     // var paramsObj = processQueryArgs(r.variables.query_string);
     var sid = ''
@@ -429,6 +390,19 @@ function cacheSessionId(paramsObj) {
         jsonObj.activeSessions.push(sid2);
     }
 
+    // set number of clients
+    jsonObj.numOfClients = jsonObj.activeSessions.length;
+
+    var count = 0;
+
+    for (let i = 0; i < jsonObj.activeSessions.length; i++) {
+        count++;
+    }
+
+    // set server load
+    jsonObj.current_load = (count * 2 * 10).toString();
+
+
     try {
         fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
         // r.return(200, 'Set sid to ' + sid + '\n');
@@ -444,6 +418,8 @@ function resetSessions(r) {
     }
 
     jsonObj.activeSessions = [];
+    jsonObj.current_load = "0";
+    jsonObj.numOfClients = 0;
 
     try {
         fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
@@ -456,12 +432,14 @@ function getServerInfo(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
-        r.return(200, 'Current metrics on ' + jsonObj.identifier + ': ' + jsonStr+ '\n');
+        r.return(200, 'Current metrics on ' + jsonObj.identifier + ': ' + jsonStr + '\n');
     } catch (e) {
         r.return(500, e + '\n');
     }
 }
 
 // Note: We need to add the function to nginx.conf file too for HTTP access
-export default { getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerStatus, setServerStatus, getNumberOfClients, setNumberOfClients, 
-    cacheSessionId, resetSessions, getServerInfo };
+export default {
+    getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerLoad, getNumberOfClients, cacheSessionId, resetSessions,
+    getServerInfo
+};

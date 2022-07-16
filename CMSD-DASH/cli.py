@@ -20,9 +20,8 @@ reload_server = run_server + " -s reload"
 restart_server = "sudo service nginx restart"
 stop_server = "sudo killall nginx"
 get_nginx_status = "sudo systemctl status nginx"
-get_nginx_active_con_1 = "curl http://localhost:8080/nginx_status"
-get_nginx_active_con_2 = "curl http://localhost:8090/nginx_status"
-reset_active_sessions = "curl http://localhost:8080/resetSessions"
+reset_active_sessions_1 = "curl http://localhost:8080/resetSessions"
+reset_active_sessions_2 = "curl http://localhost:8090/resetSessions"
 
 
 def run_command(command: str):
@@ -46,9 +45,8 @@ def print_options():
     print("3) Restart servers")
     print("4) Stop all servers")
     print("5) Get nginx status")
-    print("6) Get info about active connections")
-    print("7) Choose server")
-    print("8) Clear screen")
+    print("6) Choose server")
+    print("7) Clear screen")
 
 
 def choose_a_server(max_choice: int):
@@ -71,10 +69,8 @@ def choose_a_server(max_choice: int):
 
 def print_server_options():
     print("1) Get current server load")
-    print("2) Set current server load")
-    print("3) Get number of connected clients")
-    print("4) Set number of connected clients")
-    print("5) Go back")
+    print("2) Get number of connected clients")
+    print("3) Go back")
 
 
 def get_user_choice(max_choice: int):
@@ -90,39 +86,13 @@ def get_user_choice(max_choice: int):
 
 def get_server_load(server: str):
     if server == "1":
-        command = "curl http://localhost:8080/getStatus"
+        command = "curl http://localhost:8080/getServerLoad"
         os.system(command)
         print("---------------------\n")
     elif server == "2":
-        command = "curl http://localhost:8090/getStatus"
+        command = "curl http://localhost:8090/getServerLoad"
         os.system(command)
         print("---------------------\n")
-
-
-def set_server_load(server: str, load: int):
-    if server == "1":
-        command = "curl --header \"load: " + \
-            str(load) + "\" http://localhost:8080/setStatus"
-        os.system(command)
-        print("---------------------\n")
-    elif server == "2":
-        command = "curl --header \"load: " + \
-            str(load) + "\" http://localhost:8090/setStatus"
-        os.system(command)
-        print("---------------------\n")
-
-
-def set_new_server_load(server: str):
-    while (True):
-        print("---------------------\n")
-        user_input = input(
-            "What value should the server load be set to? (Values between 0 and 100 are possible): ")
-        print("---------------------\n")
-        if 0 <= int(user_input) <= 100:
-            set_server_load(server, user_input)
-            return
-        print("This was sadly not an option.")
-        exit()
 
 
 def get_num_clients(server: str):
@@ -136,42 +106,18 @@ def get_num_clients(server: str):
         print("---------------------\n")
 
 
-def set_num_clients(server: str, load: int):
-    if server == "1":
-        command = "curl --header \"nClients: " + \
-            str(load) + "\" http://localhost:8080/setClients"
-        os.system(command)
-        print("---------------------\n")
-    elif server == "2":
-        command = "curl --header \"nClients: " + \
-            str(load) + "\" http://localhost:8090/setClients"
-        os.system(command)
-        print("---------------------\n")
-
-
-def set_new_num_clients(server: str):
-    while (True):
-        print("---------------------\n")
-        user_input = input("How many clients shall join the server?: ")
-        print("---------------------\n")
-        if 0 <= int(user_input) <= 100:
-            set_num_clients(server, user_input)
-            return
-        print("This was sadly not an option.")
-        exit()
-
-
 def main():
     start()
 
     while(True):
         print_options()
-        uc = get_user_choice(8)
+        uc = get_user_choice(7)
         if uc == 1:
             run_command(run_server)
         if uc == 2:
             run_command(reload_server)
-            run_command(reset_active_sessions)
+            run_command(reset_active_sessions_1)
+            run_command(reset_active_sessions_2)
             # maybe also kill all chrome
         if uc == 3:
             run_command(restart_server)
@@ -180,11 +126,6 @@ def main():
         if uc == 5:
             run_command(get_nginx_status)
         if uc == 6:
-            print("For Server 1:\n")
-            run_command(get_nginx_active_con_1)
-            print("For Server 2:\n")
-            run_command(get_nginx_active_con_2)
-        if uc == 7:
             sc = choose_a_server(2)
             server = ""
             if sc == 1:
@@ -193,18 +134,14 @@ def main():
                 server = "2"
             while(True):
                 print_server_options()
-                uc = get_user_choice(5)
+                uc = get_user_choice(3)
                 if uc == 1:
                     get_server_load(server)
-                if uc == 2:
-                    set_new_server_load(server)
-                elif uc == 3:
+                elif uc == 2:
                     get_num_clients(server)
-                elif uc == 4:
-                    set_new_num_clients(server)
-                elif uc == 5:
+                elif uc == 3:
                     main()
-        if uc == 8:
+        if uc == 7:
             main()
 
 
