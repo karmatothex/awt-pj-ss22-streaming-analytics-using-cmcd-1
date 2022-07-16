@@ -2,8 +2,13 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // TODO: insert the absolute path to the project
+<<<<<<< HEAD
 // var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+=======
+var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+//var PROJECTPATH =  '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+>>>>>>> b26abd4528344e330e9f74ca1756ca59c3f8ef8a
 
 var LOGPATH = PROJECTPATH + 'server/logs/';
 
@@ -142,7 +147,14 @@ function getResourceUsingSubrequestBBRD(r) {
     var bandwithThroughput = 10000;
     var reservedBandwith = 1000; //rest can be divided between clients
 
+<<<<<<< HEAD
     var maxBitrate = (bandwithThroughput - reservedBandwith) / getNumberOfClients_intern();
+=======
+    var numc =getNumberOfClients_intern();
+    if(numc == 0)
+        numc = 1;
+    var maxBitrate = (bandwithThroughput - reservedBandwith) / numc;
+>>>>>>> b26abd4528344e330e9f74ca1756ca59c3f8ef8a
 
     dynamicResp += ",mb=" + parseInt(maxBitrate, 10).toString();
     var cmcdValuesToTake = ["st", "ot", "sf", "v"]
@@ -366,7 +378,7 @@ function getNumberOfClients_intern() {
     try {
         var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
-        return jsonObj.numOfClients;
+        return jsonObj.activeSessions.length;
     } catch (e) {
         // r.return(500, e + '\n');
         return e;
@@ -410,6 +422,7 @@ function cacheSessionId(paramsObj) {
     }
 }
 
+
 function resetSessions(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER2INFO);
@@ -432,7 +445,11 @@ function getServerInfo(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER2INFO);
         var jsonObj = JSON.parse(jsonStr);
+<<<<<<< HEAD
         r.return(200, 'Current metrics on ' + jsonObj.identifier + ': ' + jsonStr + '\n');
+=======
+        r.return(200,  jsonStr);
+>>>>>>> b26abd4528344e330e9f74ca1756ca59c3f8ef8a
     } catch (e) {
         r.return(500, e + '\n');
     }
