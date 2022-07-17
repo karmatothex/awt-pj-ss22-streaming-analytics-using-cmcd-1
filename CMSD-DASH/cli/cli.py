@@ -3,11 +3,11 @@ from requests import get
 
 
 banner = """
-                 ██████╗███╗   ███╗███████╗██████╗
-                ██╔════╝████╗ ████║██╔════╝██╔══██╗
-                ██║     ██╔████╔██║███████╗██║  ██║
-                ██║     ██║╚██╔╝██║╚════██║██║  ██║
-                ╚██████╗██║ ╚═╝ ██║███████║██████╔╝
+             ██████╗███╗   ███╗███████╗██████╗
+            ██╔════╝████╗ ████║██╔════╝██╔══██╗
+            ██║     ██╔████╔██║███████╗██║  ██║
+            ██║     ██║╚██╔╝██║╚════██║██║  ██║
+            ╚██████╗██║ ╚═╝ ██║███████║██████╔╝
 
                                                     """
 # Absolute path to the project
@@ -35,9 +35,13 @@ def run_command(command: str):
 def start():
     os.system("clear")
     print(banner)
+    # print(">>> TU Berlin - Advanced Web Technologies Project <<<\n")
+    # print(">>> awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1 <<<\n")
+    # print(">>> This is a simple command line interface to facilitate the use and control of this CMSD project <<<\n")
+    # print(">>> To call a function, simply enter the corresponding number <<<\n")
+
     print(">>> TU Berlin - Advanced Web Technologies Project <<<\n")
     print(">>> awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1 <<<\n")
-    print(">>> This is a simple command line interface to simulate the behavior of servers <<<\n")
 
 
 def print_options():
@@ -52,22 +56,12 @@ def print_options():
     print("8) Start monitor")
 
 
-def choose_a_server(max_choice: int):
-    while (True):
-        print("")
-        print("Available servers:")
-        print("1) Server 1")
-        print("2) Server 2")
-        print("")
-        user_input = input("Choose a server: ")
-        print("")
-        if 0 < int(user_input) <= max_choice:
-            return int(user_input)
-        if user_input == "cancel":
-            print("As you wish.")
-            exit()
-        print("This was sadly not an option.")
-        print_options()
+def print_servers():
+    print("")
+    print("Available servers:")
+    print("1) Server 1")
+    print("2) Server 2")
+    print("")
 
 
 def print_server_options():
@@ -76,15 +70,38 @@ def print_server_options():
     print("3) Go back")
 
 
+def choose_a_server(max_choice: int):
+    while(True):
+        print_servers()
+        user_input = input("Choose a server: ")
+        print("")
+        try:
+            if 0 < int(user_input) <= max_choice:
+                return int(user_input)
+            else:
+                print("This was sadly not an option, try again.")
+                print("To call a function, simply enter the corresponding number.\n")
+        except ValueError:
+            print("This was sadly not an option.")
+            print("To call a function, simply enter the corresponding number.\n")
+
+
 def get_user_choice(max_choice: int):
     while (True):
         print("")
         user_input = input("What do you want to do? ")
         print("")
-        if 0 < int(user_input) <= max_choice:
-            return int(user_input)
-        print("This was sadly not an option.")
-        print_options()
+        try:
+            if 0 < int(user_input) <= max_choice:
+                return int(user_input)
+            else:
+                print("This was sadly not an option, try again.")
+                print("To call a function, simply enter the corresponding number.\n")
+                return
+        except ValueError:
+            print("This was sadly not an option, try again.")
+            print("To call a function, simply enter the corresponding number.\n")
+            return
 
 
 def get_server_load(server: str):
@@ -121,7 +138,7 @@ def main():
             run_command(reload_server)
             run_command(reset_active_sessions_1)
             run_command(reset_active_sessions_2)
-            # maybe also kill all chrome
+            # maybe also killall chrome
         if uc == 3:
             run_command(restart_server)
         if uc == 4:
@@ -155,4 +172,5 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
+        print("\r  ")
         print("\nBye!")
