@@ -11,8 +11,8 @@ banner = """
 
                                                     """
 # Absolute path to the project
-#project_path = "/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
-project_path = "/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
+project_path = "/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
+#project_path = "/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
 
 # nginx commands
 run_server = "sudo nginx -c" + project_path + "CMSD-DASH/server/nginx/config/nginx.conf"
@@ -47,15 +47,9 @@ def print_options():
     print("3) Restart servers")
     print("4) Stop all servers")
     print("5) Get nginx status")
-<<<<<<< HEAD
     print("6) Choose server")
     print("7) Clear screen")
-=======
-    print("6) Get info about active connections")
-    print("7) Choose server")
-    print("8) Clear screen")
-    print("9) Start monitor")
->>>>>>> b26abd4528344e330e9f74ca1756ca59c3f8ef8a
+    print("8) Start monitor")
 
 
 def choose_a_server(max_choice: int):
@@ -120,11 +114,7 @@ def main():
 
     while(True):
         print_options()
-<<<<<<< HEAD
-        uc = get_user_choice(7)
-=======
-        uc = get_user_choice(9)
->>>>>>> b26abd4528344e330e9f74ca1756ca59c3f8ef8a
+        uc = get_user_choice(8)
         if uc == 1:
             run_command(run_server)
         if uc == 2:
@@ -156,7 +146,7 @@ def main():
                     main()
         if uc == 7:
             main()
-        if uc == 9:
+        if uc == 8:
             run_command(run_monitor)
 
 
