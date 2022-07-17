@@ -136,7 +136,7 @@ function getResourceUsingSubrequestBBRD(r) {
     var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
     var overload = false;
     // set overload threshold to 60 %
-    if (getServerLoad_intern() > 60) { //test
+    if (getServerLoad_intern() > 60 || getOverload_intern() == "true") { //test
         writeLog("Overload occured");
         dynamicResp += ",du";
         overload = true;
@@ -392,6 +392,8 @@ function cacheServerInfo(paramsObj, overload) {
     } catch (e) {
     }
 
+    // if a new client wants to connect with the server and the server is not overloaded, cache sid
+    // if client is connected and server sends overload flag, delete sid (also send du flag in getResourceUsingSubrequestBBRD)
     if (!jsonObj.activeSessions.includes(sid2) && !overload) {
         jsonObj.activeSessions.push(sid2);
     } else if(jsonObj.activeSessions.includes(sid2) && overload) {
@@ -422,6 +424,7 @@ function resetSessions(r) {
     jsonObj.activeSessions = [];
     jsonObj.current_load = "0";
     jsonObj.numOfClients = 0;
+    jsonObj.overload = "false";
 
     try {
         fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
@@ -440,8 +443,48 @@ function getServerInfo(r) {
     }
 }
 
+function getOverload(r) {
+    try {
+        var jsonStr = fs.readFileSync(SERVER1INFO);
+        var jsonObj = JSON.parse(jsonStr);
+        r.return(200, 'Overload' + jsonObj.identifier + ': ' + jsonObj.overload + '\n');
+    } catch (e) {
+        r.return(500, e + '\n');
+    }
+}
+
+function getOverload_intern() {
+    try {
+        var jsonStr = fs.readFileSync(SERVER1INFO);
+        var jsonObj = JSON.parse(jsonStr);
+        return jsonObj.overload;
+    } catch (e) {
+        return e;
+    }
+}
+
+// e.g. set true: curl -v --header "overload: true" http://localhost:8080/setoOverload -> after that client will switch server
+function setOverload(r) {
+    var overload = r.headersIn.overload;
+
+    try {
+        var jsonStr = fs.readFileSync(SERVER1INFO);
+        var jsonObj = JSON.parse(jsonStr);
+    } catch (e) {
+        r.return(500, e + '\n');
+    }
+
+    jsonObj.overload = overload;
+
+    try {
+        fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
+        r.return(200, 'Overload from ' + jsonObj.identifier + ' set to: ' + overload + '\n');
+    } catch (e) {
+    }
+}
+
 // Note: We need to add the function to nginx.conf file too for HTTP access
 export default {
     getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerLoad, getNumberOfClients, resetSessions,
-    getServerInfo
+    getServerInfo, setOverload, getOverload
 };

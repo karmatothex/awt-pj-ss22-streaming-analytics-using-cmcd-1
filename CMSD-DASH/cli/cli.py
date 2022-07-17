@@ -67,7 +67,9 @@ def print_servers():
 def print_server_options():
     print("1) Get current server load")
     print("2) Get number of connected clients")
-    print("3) Go back")
+    print("3) Get (manual) overload")
+    print("4) Set (manual) overload")
+    print("5) Go back")
 
 
 def choose_a_server(max_choice: int):
@@ -126,6 +128,39 @@ def get_num_clients(server: str):
         print("---------------------\n")
 
 
+def get_overload(server: str):
+    if server == "1":
+        command = "curl http://localhost:8080/getOverload"
+        os.system(command)
+        print("---------------------\n")
+    elif server == "2":
+        command = "curl http://localhost:8090/getOverload"
+        os.system(command)
+        print("---------------------\n")
+
+
+def set_overload(server: str, overload: str):
+    if server == "1":
+        command = "curl --header \"overload: " + overload + "\" http://localhost:8080/setOverload"
+        os.system(command)
+        print("---------------------\n")
+    elif server == "2":
+        command = "curl --header \"overload: " + overload + "\" http://localhost:8090/setOverload"
+        os.system(command)
+        print("---------------------\n")
+
+
+def set_new_overload(server: str):
+    while (True):
+        print("---------------------\n")
+        user_input = input("Set overload? (true/false): ")
+        print("---------------------\n")
+        if (user_input == "true") | (user_input == "false"):
+            set_overload(server, user_input)
+            return
+        else:
+            print("This was sadly not an option, try again.\n")
+
 def main():
     start()
 
@@ -154,12 +189,16 @@ def main():
                 server = "2"
             while(True):
                 print_server_options()
-                uc = get_user_choice(3)
+                uc = get_user_choice(5)
                 if uc == 1:
                     get_server_load(server)
                 elif uc == 2:
                     get_num_clients(server)
                 elif uc == 3:
+                    get_overload(server)
+                elif uc == 4:
+                    set_new_overload(server)
+                elif uc == 5:
                     main()
         if uc == 7:
             main()
