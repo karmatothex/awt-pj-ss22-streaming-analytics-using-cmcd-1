@@ -2,8 +2,8 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // TODO: insert the absolute path to the project
-// var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
-var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+ var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+//var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 
 var LOGPATH = PROJECTPATH + 'server/logs/';
 
@@ -152,6 +152,7 @@ function getResourceUsingSubrequestBBRD(r) {
         numc = 1;
     var maxBitrate = (bandwithThroughput - reservedBandwith) / numc;
 
+    setMaxBitrate(maxBitrate);
     dynamicResp += ",mb=" + parseInt(maxBitrate, 10).toString();
     var cmcdValuesToTake = ["st", "ot", "sf", "v"]
     for (var value in cmcdValuesToTake) {
@@ -414,6 +415,8 @@ function cacheServerInfo(paramsObj, overload) {
 }
 
 
+
+
 function resetSessions(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
@@ -425,6 +428,7 @@ function resetSessions(r) {
     jsonObj.current_load = "0";
     jsonObj.numOfClients = 0;
     jsonObj.overload = "false";
+    jsonObj.maxBitrate = 9000;
 
     try {
         fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
@@ -460,6 +464,20 @@ function getOverload_intern() {
         return jsonObj.overload;
     } catch (e) {
         return e;
+    }
+}
+
+function setMaxBitrate(bitrate) {
+    try {
+        var jsonStr = fs.readFileSync(SERVER1INFO);
+        var jsonObj = JSON.parse(jsonStr);
+    } catch (e) {
+    }
+    jsonObj.maxBitrate = parseInt(bitrate, 10);
+
+    try {
+        fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
+    } catch (e) {
     }
 }
 
