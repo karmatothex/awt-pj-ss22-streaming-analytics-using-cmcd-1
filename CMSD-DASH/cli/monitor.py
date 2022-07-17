@@ -11,8 +11,8 @@ server1_port = 8080
 server2_port = 8090
 
 
-def load_color(load: int) -> str:
-    if load  < 60:
+def load_color(load: int, overloaded) -> str:
+    if load  < 60 and overloaded != "true":
         return f"\033[92m {load} \033[0m"
     else:
         return f"\033[91m {load}   \033[0m"
@@ -34,7 +34,11 @@ def query_servers():
     res = []
 
     res.append(["identifier", data1["identifier"], data2["identifier"]])
-    res.append(["current_load", load_color(int(data1["current_load"])), load_color(int(data2["current_load"]))])
+    res.append(["current_load", load_color(int(data1["current_load"]), data1["overload"]), load_color(int(data2["current_load"]), data2["overload"])])
+    if "maxBitrate" in data1 and "maxBitrate" in data2:
+        res.append(["bitrateLimit", data1["maxBitrate"], data2["maxBitrate"]])
+    else:
+        res.append(["bitrateLimit", "x", "x"])
 
     list1 = data1["activeSessions"]
     list2 = data2["activeSessions"]
