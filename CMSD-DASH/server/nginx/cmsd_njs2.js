@@ -7,9 +7,9 @@ var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmc
 
 var LOGPATH = PROJECTPATH + 'server/logs/';
 
-var LOGFILE = LOGPATH + 'cmsd.log';
-var CSVFILE = LOGPATH + 'cmsd.csv';
-var CONFIGFILE = LOGPATH + 'cmsd_config.json';
+var LOGFILE = LOGPATH + 'cmsd2.log';
+var CSVFILE = LOGPATH + 'cmsd2.csv';
+var CONFIGFILE = LOGPATH + 'cmsd_config2.json';
 
 var SERVER2INFO = PROJECTPATH + 'server/nginx/config/server2.json'
 
@@ -134,10 +134,15 @@ function getResourceUsingSubrequestBBRD(r) {
 
     var staticResp = 'n=' + getOriginIdentifier() + ',';
     var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay2);
+    var overload = false;
+    // set overload threshold to 60 %
     if (getServerLoad_intern() > 60) { //test
         writeLog("Overload occured");
         dynamicResp += ",du";
+        overload = true;
     }
+    // todo
+    cacheServerInfo(paramsObj, overload);
 
     var bandwithThroughput = 10000;
     var reservedBandwith = 1000; //rest can be divided between clients
@@ -317,9 +322,6 @@ function getBufferBasedDelay(r) {
 
     writeCsv(metricsObj);
 
-    // cache sid
-    cacheSessionId(paramsObj);
-
     return delay;
 }
 
@@ -376,11 +378,12 @@ function getNumberOfClients_intern() {
     }
 }
 
-function cacheSessionId(paramsObj) {
-    // var paramsObj = processQueryArgs(r.variables.query_string);
+// handle server info: load, sessions, number of clients
+function cacheServerInfo(paramsObj, overload) {
     var sid = ''
     if ('sid' in paramsObj) { sid = paramsObj['sid']; }
 
+    // cut "" from string
     var sid2 = sid.replace(/"/g, "");
 
     try {
@@ -389,26 +392,21 @@ function cacheSessionId(paramsObj) {
     } catch (e) {
     }
 
-    if (!jsonObj.activeSessions.includes(sid2)) {
+    if (!jsonObj.activeSessions.includes(sid2) && !overload) {
         jsonObj.activeSessions.push(sid2);
+    } else if(jsonObj.activeSessions.includes(sid2) && overload) {
+        const index = jsonObj.activeSessions.indexOf(sid2);
+        jsonObj.activeSessions.splice(index, 1);
     }
 
     // set number of clients
     jsonObj.numOfClients = jsonObj.activeSessions.length;
 
-    var count = 0;
-
-    for (let i = 0; i < jsonObj.activeSessions.length; i++) {
-        count++;
-    }
-
-    // set server load
-    jsonObj.current_load = (count * 2 * 10).toString();
-
+    // set server load -> simulate 20% load per client
+    jsonObj.current_load = (jsonObj.numOfClients * 2 * 10).toString();
 
     try {
         fs.writeFileSync(SERVER2INFO, JSON.stringify(jsonObj));
-        // r.return(200, 'Set sid to ' + sid + '\n');
     } catch (e) {
     }
 }
