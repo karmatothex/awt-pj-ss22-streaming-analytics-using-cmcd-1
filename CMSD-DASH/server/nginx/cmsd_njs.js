@@ -2,8 +2,8 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // TODO: insert the absolute path to the project
- var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
-//var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+//  var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 
 var LOGPATH = PROJECTPATH + 'server/logs/';
 
@@ -136,7 +136,7 @@ function getResourceUsingSubrequestBBRD(r) {
     var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
     var overload = false;
     // set overload threshold to 60 %
-    if (getServerLoad_intern() > 60 || getOverload_intern() == "true") { //test
+    if (getServerLoad_intern() > 60 || getOverload_intern() == "true") {
         writeLog("Overload occured");
         dynamicResp += ",du";
         overload = true;
@@ -397,7 +397,7 @@ function cacheServerInfo(paramsObj, overload) {
     // if client is connected and server sends overload flag, delete sid (also send du flag in getResourceUsingSubrequestBBRD)
     if (!jsonObj.activeSessions.includes(sid2) && !overload) {
         jsonObj.activeSessions.push(sid2);
-    } else if(jsonObj.activeSessions.includes(sid2) && overload) {
+    } else if (jsonObj.activeSessions.includes(sid2) && overload) {
         const index = jsonObj.activeSessions.indexOf(sid2);
         jsonObj.activeSessions.splice(index, 1);
     }
@@ -413,9 +413,6 @@ function cacheServerInfo(paramsObj, overload) {
     } catch (e) {
     }
 }
-
-
-
 
 function resetSessions(r) {
     try {

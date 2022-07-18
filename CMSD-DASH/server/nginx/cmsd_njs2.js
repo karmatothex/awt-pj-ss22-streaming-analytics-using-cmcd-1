@@ -2,8 +2,8 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // TODO: insert the absolute path to the project
-var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
-//var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+// var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 
 var LOGPATH = PROJECTPATH + 'server/logs/';
 
@@ -397,7 +397,7 @@ function cacheServerInfo(paramsObj, overload) {
     // if client is connected and server sends overload flag, delete sid (also send du flag in getResourceUsingSubrequestBBRD)
     if (!jsonObj.activeSessions.includes(sid2) && !overload) {
         jsonObj.activeSessions.push(sid2);
-    } else if(jsonObj.activeSessions.includes(sid2) && overload) {
+    } else if (jsonObj.activeSessions.includes(sid2) && overload) {
         const index = jsonObj.activeSessions.indexOf(sid2);
         jsonObj.activeSessions.splice(index, 1);
     }
@@ -414,7 +414,6 @@ function cacheServerInfo(paramsObj, overload) {
     }
 }
 
-
 function resetSessions(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER2INFO);
@@ -427,7 +426,6 @@ function resetSessions(r) {
     jsonObj.numOfClients = 0;
     jsonObj.overload = "false";
     jsonObj.maxBitrate = 9000;
-
 
     try {
         fs.writeFileSync(SERVER2INFO, JSON.stringify(jsonObj));
@@ -465,7 +463,6 @@ function getOverload_intern() {
         return e;
     }
 }
-
 
 function setMaxBitrate(bitrate) {
     try {

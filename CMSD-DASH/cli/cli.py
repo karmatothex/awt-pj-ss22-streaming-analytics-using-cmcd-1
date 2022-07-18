@@ -23,7 +23,20 @@ get_nginx_status = "sudo systemctl status nginx"
 reset_active_sessions_1 = "curl http://localhost:8080/resetSessions"
 reset_active_sessions_2 = "curl http://localhost:8090/resetSessions"
 
+# monitor command
 run_monitor = "python3 monitor.py"
+
+# dash-js command
+launch_dash_js = "cd " + project_path + "/CMSD-DASH/dash.js/ && grunt dev"
+
+# log commands
+access_log = "tail -f /var/log/nginx/access.log"
+error_log = "tail -f /var/log/nginx/error.log"
+server_1_log = "tail -f " + project_path + "/CMSD-DASH/server/logs/cmsd.log"
+server_2_log = "tail -f " + project_path + "/CMSD-DASH/server/logs/cmsd2.log"
+
+# run clients command
+run_clients = "cd " + project_path + "/CMSD-DASH/dash-test && sudo bash batch_test.sh" 
 
 
 def run_command(command: str):
@@ -35,25 +48,23 @@ def run_command(command: str):
 def start():
     os.system("clear")
     print(banner)
-    # print(">>> TU Berlin - Advanced Web Technologies Project <<<\n")
-    # print(">>> awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1 <<<\n")
-    # print(">>> This is a simple command line interface to facilitate the use and control of this CMSD project <<<\n")
-    # print(">>> To call a function, simply enter the corresponding number <<<\n")
-
     print(">>> TU Berlin - Advanced Web Technologies Project <<<\n")
     print(">>> awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1 <<<\n")
 
 
 def print_options():
     print(">>> Options")
-    print("1) Start servers")
-    print("2) Reload server config")
-    print("3) Restart servers")
-    print("4) Stop all servers")
-    print("5) Get nginx status")
-    print("6) Choose server")
-    print("7) Clear screen")
-    print("8) Start monitor")
+    print(" 1) Start servers")
+    print(" 2) Launch dash-js")
+    print(" 3) Run multiple clients")
+    print(" 4) Reload server config")
+    print(" 5) Restart servers")
+    print(" 6) Stop all servers")
+    print(" 7) Get nginx status")
+    print(" 8) Choose server")
+    print(" 9) Start monitor")
+    print("10) Watch logs")
+    print("11) Clear screen")
 
 
 def print_servers():
@@ -61,6 +72,17 @@ def print_servers():
     print("Available servers:")
     print("1) Server 1")
     print("2) Server 2")
+    print("")
+
+
+def print_logfiles():
+    print("")
+    print("Available logfiles:")
+    print("1) Nginx access.log")
+    print("2) Nginx error.log")
+    print("3) Server 1 logs")
+    print("4) Server 2 logs")
+    print("5) Go back")
     print("")
 
 
@@ -166,44 +188,61 @@ def main():
 
     while(True):
         print_options()
-        uc = get_user_choice(8)
+        uc = get_user_choice(11)
         if uc == 1:
             run_command(run_server)
         if uc == 2:
+            run_command(launch_dash_js)
+        if uc == 3:
+            os.system("clear")
+            run_command(run_clients)
+        if uc == 4:
             run_command(reload_server)
             run_command(reset_active_sessions_1)
             run_command(reset_active_sessions_2)
-            # maybe also killall chrome
-        if uc == 3:
-            run_command(restart_server)
-        if uc == 4:
-            run_command(stop_server)
+            # run_command("sudo killall chrome") 
         if uc == 5:
-            run_command(get_nginx_status)
+            run_command(restart_server)
         if uc == 6:
+            run_command(stop_server)
+        if uc == 7:
+            run_command(get_nginx_status)
+        if uc == 8:
             sc = choose_a_server(2)
-            server = ""
-            if sc == 1:
-                server = "1"
-            elif sc == 2:
-                server = "2"
             while(True):
                 print_server_options()
                 uc = get_user_choice(5)
                 if uc == 1:
-                    get_server_load(server)
+                    get_server_load(str(sc))
                 elif uc == 2:
-                    get_num_clients(server)
+                    get_num_clients(str(sc))
                 elif uc == 3:
-                    get_overload(server)
+                    get_overload(str(sc))
                 elif uc == 4:
-                    set_new_overload(server)
+                    set_new_overload(str(sc))
                 elif uc == 5:
                     main()
-        if uc == 7:
-            main()
-        if uc == 8:
+        if uc == 9:
             run_command(run_monitor)
+        if uc == 10:
+            print_logfiles()
+            fc = get_user_choice(5)
+            if fc == 1:
+                os.system("clear")
+                run_command(access_log)
+            elif fc == 2:
+                os.system("clear")
+                run_command(error_log)
+            elif fc == 3:
+                os.system("clear")
+                run_command(server_1_log)
+            elif fc == 4:
+                os.system("clear")
+                run_command(server_2_log)
+            elif fc == 5:
+                main()
+        if uc == 11:
+            main()  
 
 
 

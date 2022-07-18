@@ -154,13 +154,13 @@
             <fieldset>
                 <legend>Current values</legend>
                 <ul>
-                    <li>Latency: <span id="latency-tag"></span></li>
+                    <!-- <li>Latency: <span id="latency-tag"></span></li> -->
                     <!-- <li>Min. drift: <span id="mindrift-tag"></span></li> -->
                     <li>Playback rate: <span id="playbackrate-tag"></span></li>
                     <li>Buffer: <b><span id="buffer-tag"></span></b></li>
                     <li>Quality: <b><span id="quality-tag"></span></b></li>
                     <li>Bitrate limit: <b><span id="max-bitrate"></span></b></li>
-                    <li>Measured throughput: <b><span id="tput-tag"></span></b></li>
+                    <!-- <li>Measured throughput: <b><span id="tput-tag"></span></b></li> -->
                     <li>Rule used: <b><span id="rule-used-tag"></span></b></li>
                     <li>Session-Id: <b><span id="session-id"></span></b></li>
                     <li>Origin: <b><span id="origin"></span></b></li>
@@ -199,11 +199,11 @@
             var dashMetrics = player.getDashMetrics();
             var settings = player.getSettings();
 
-            var currentLatency = parseFloat(player.getCurrentLiveLatency(), 10);
-            document.getElementById("latency-tag").innerHTML = currentLatency + " secs";
+            // var currentLatency = parseFloat(player.getCurrentLiveLatency(), 10);
+            // document.getElementById("latency-tag").innerHTML = currentLatency + " secs";
 
-            var measuredThroughput = Math.round(player.getAverageThroughput("video"));
-            document.getElementById("tput-tag").innerHTML = measuredThroughput + " Kbps";
+            // var measuredThroughput = Math.round(player.getAverageThroughput("video"));
+            // document.getElementById("tput-tag").innerHTML = measuredThroughput + " Kbps";
 
             // document.getElementById("mindrift-tag").innerHTML = settings.streaming.liveCatchUpMinDrift + " secs";
 
