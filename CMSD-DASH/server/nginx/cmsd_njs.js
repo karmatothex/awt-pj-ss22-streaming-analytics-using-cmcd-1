@@ -331,7 +331,7 @@ function getServerLoad(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
-        r.return(200, 'Load from ' + jsonObj.identifier + ' is at ' + jsonObj.current_load + '%\n');
+        r.return(200, 'Load from ' + jsonObj.identifier + ' is at ' + parseInt(jsonObj.current_load) + parseInt(jsonObj.additional_load)+ '%\n');
     } catch (e) {
         r.return(500, e + '\n');
     }
@@ -341,7 +341,7 @@ function getServerLoad_intern() {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
-        return jsonObj.current_load;
+        return parseInt(jsonObj.current_load) + parseInt(jsonObj.additional_load);
     } catch (e) {
         return e;
     }
@@ -426,6 +426,7 @@ function resetSessions(r) {
     jsonObj.numOfClients = 0;
     jsonObj.overload = "false";
     jsonObj.maxBitrate = 9000;
+    jsonObj.additional_load = 0;
 
     try {
         fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
@@ -498,8 +499,28 @@ function setOverload(r) {
     }
 }
 
+// e.g. set true: curl -v --header "load:20" http://localhost:8080/setAdditionalLoad -> after that client will switch server
+function setAdditionalLoad(r) {
+    var load = r.headersIn.load;
+
+    try {
+        var jsonStr = fs.readFileSync(SERVER1INFO);
+        var jsonObj = JSON.parse(jsonStr);
+    } catch (e) {
+        r.return(500, e + '\n');
+    }
+
+    jsonObj.additional_load = load;
+
+    try {
+        fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));
+        r.return(200, 'Additional load from ' + jsonObj.identifier + ' set to: ' + load + '\n');
+    } catch (e) {
+    }
+}
+
 // Note: We need to add the function to nginx.conf file too for HTTP access
 export default {
     getResourceUsingSubrequestBBRD, getBufferBasedDelay, getServerLoad, getNumberOfClients, resetSessions,
-    getServerInfo, setOverload, getOverload
+    getServerInfo, setOverload, getOverload, setAdditionalLoad
 };

@@ -13,8 +13,8 @@ banner = """
                                                                          
                                                     """
 # Absolute path to the project
-project_path = "/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
-#project_path = "/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
+#project_path = "/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
+project_path = "/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
 
 # Path to the project logs directory
 logs_path = "../server/logs"
@@ -97,7 +97,8 @@ def print_server_options():
     print("2) Get number of connected clients")
     print("3) Get (manual) overload")
     print("4) Set (manual) overload")
-    print("5) Go back")
+    print("5) Set additional load")
+    print("6) Go back")
 
 
 def choose_a_server(max_choice: int):
@@ -178,6 +179,32 @@ def set_overload(server: str, overload: str):
         print("---------------------\n")
 
 
+def set_additional_load(server: str):
+    while (True):
+        print("---------------------\n")
+        user_input = input("Enter desirable load:")
+        print("---------------------\n")
+        try:
+            if 0 < int(user_input) <= 100:
+                if server == "1":
+                    command = "curl --header \"load: " + user_input + "\" http://localhost:8080/setAdditionalLoad"
+                    os.system(command)
+                    print("---------------------\n")
+                elif server == "2":
+                    command = "curl --header \"load: " + user_input + "\" http://localhost:8090/setAdditionalLoad"
+                    os.system(command)
+                    print("---------------------\n")
+                return
+            else:
+                print("This was sadly not an option, try again.")
+                print("To call a function, simply enter the corresponding number.\n")
+                return
+        except ValueError:
+            print("This was sadly not an option, try again.")
+            print("To call a function, simply enter the corresponding number.\n")
+            return
+
+
 def set_new_overload(server: str):
     while (True):
         print("---------------------\n")
@@ -218,7 +245,7 @@ def main():
             sc = choose_a_server(2)
             while(True):
                 print_server_options()
-                uc = get_user_choice(5)
+                uc = get_user_choice(6)
                 if uc == 1:
                     get_server_load(str(sc))
                 elif uc == 2:
@@ -228,7 +255,9 @@ def main():
                 elif uc == 4:
                     set_new_overload(str(sc))
                 elif uc == 5:
-                    main()
+                    set_additional_load(server)
+                elif uc == 6:
+                    break
         if uc == 9:
             run_command(run_monitor)
         if uc == 10:

@@ -243,18 +243,14 @@
         player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => {
             console.warn("Fragment loaded")
             console.warn(e)
-            //Checking, if the origin is overloaded and we have to switch to the another one
-            //TODO: also consider rtt
             if (e.request.responseHeaders.includes("n=")){
                 document.getElementById("origin").innerHTML = e.request.responseHeaders.split("n=")[1].split(",")[0];
 
             }
             
             
-            if (e.request.responseHeaders.includes("du")) {
+            if (e.request.responseHeaders.includes("du")) { //switching between origins if du flag came
                 console.warn("...SERVER OVERLOADED...")
-                // var change_origin = window.confirm("Origin says, its overloaded. Change to another one?");
-                // if (change_origin) {
                     var stopedAt = player.time();
                     if (e.request.serviceLocation.includes("8080")) {
                         // console.warn(">>>Switching to the port 8090")
@@ -263,41 +259,23 @@
                         // console.warn(">>>Switching to the port 8080")
                         player.attachSource("http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd" + "#t=" + stopedAt.toString())
                     }
-                // }
             }
 
             console.warn("response headers :")
             console.warn(e.request.responseHeaders);
-            if (e.request.responseHeaders.includes("mb=")) {
+            if (e.request.responseHeaders.includes("mb=")) { 
                 mbvalue = e.request.responseHeaders.split("mb=")[1].split("\n")[0];
 
-                if (mbvalue != player.getSettings().streaming.abr.maxBitrate.video) {
-                    //TODO:Here we could parse the CMSD data and adapt some metrics
+                if (mbvalue != player.getSettings().streaming.abr.maxBitrate.video) { //setting max bitrate to mb, if a new value is there
                     player.updateSettings({
                         streaming: {
-                            //Maybe we can increase buffertime for the better bandwith utilization
-                            //The idea - to load more data, while we have such an option
-                            //TODO: connect it with CMSD-etp, also CMSD-rtt?
-                            //stableBufferTime: player.getSettings().streaming.stableBufferTime * 1.1,
-                            //bufferTimeAtTopQualityLongForm: player.getSettings().streaming.bufferTimeAtTopQuality * 1.1,
-
-                            abr: { //this is the another point to change something, but we have to research more about abr and how it works
+                            abr: { 
                                 maxBitrate: {
-                                    video: parseInt(mbvalue), //TODO: This values should be lower/equal then CMSD-mb 
-                                    //Be carefull by changing it :D
+                                    video: parseInt(mbvalue)
                                 }
                             },
-                            useDefaultABRRules: true,
-                            ABRStrategy: 'abrThroughput',
-                            additionalAbrRules: { //and what these rules are meaning
-                                insufficientBufferRule: false,
-                                switchHistoryRule: false,
-                                droppedFramesRule: false,
-                                abandonRequestsRule: false
-                            }
                         }
                     });
-
                 }
             }
             console.warn('Fragment loading completed', e);
