@@ -1,18 +1,21 @@
 node_modules
 CMSD-dash/.DS_Store
 
-CMSD-dash/!dash-test/results/generate_summary.py
-CMSD-dash/dash-test/results_processing
-CMSD-dash/dash-test-batch-old
-CMSD-dash/dash-test/results_*
-CMSD-dash/dash-test/tmpUserDataDir
-CMSD-dash/dash-test/tc-network-profiles/log/*
-CMSD-dash/!dash-test/tc-network-profiles/log/sample_10c_Cascade.csv
+# CMSD-dash/!dash-test/results/generate_summary.py
+# CMSD-dash/dash-test/results_processing
+# CMSD-dash/dash-test-batch-old
+# CMSD-dash/dash-test/results_*
+# CMSD-dash/dash-test/tmpUserDataDir
+# CMSD-dash/dash-test/tc-network-profiles/log/*
+# CMSD-dash/!dash-test/tc-network-profiles/log/sample_10c_Cascade.csv
 
-CMSD-dash/cmcd-server/nginx/media/vod/QualaDataset/*
-CMSD-dash/!cmcd-server/nginx/media/vod/QualaDataset/readme.txt
-CMSD-dash/cmcd-server/nginx/media/vod/NossdavCMCD/*
-CMSD-dash/!cmcd-server/nginx/media/vod/NossdavCMCD/readme.txt
+# CMSD-dash/cmcd-server/nginx/media/vod/QualaDataset/*
+# CMSD-dash/!cmcd-server/nginx/media/vod/QualaDataset/readme.txt
+# CMSD-dash/cmcd-server/nginx/media/vod/NossdavCMCD/*
+# CMSD-dash/!cmcd-server/nginx/media/vod/NossdavCMCD/readme.txt
+
+# CMSD-DASH/server/nginx/config/server1.json
+# CMSD-DASH/server/nginx/config/server2.json
 
 CMSD-DASH/dash-test/tmpUserDataDir/
 CMSD-DASH/dash-test/results/

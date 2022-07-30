@@ -3,16 +3,21 @@ from requests import get
 
 
 banner = """
-             ██████╗███╗   ███╗███████╗██████╗
-            ██╔════╝████╗ ████║██╔════╝██╔══██╗
-            ██║     ██╔████╔██║███████╗██║  ██║
-            ██║     ██║╚██╔╝██║╚════██║██║  ██║
-            ╚██████╗██║ ╚═╝ ██║███████║██████╔╝
-
+  
+  ██████╗███╗   ███╗███████╗██████╗       ██████╗  █████╗ ███████╗██╗  ██╗
+ ██╔════╝████╗ ████║██╔════╝██╔══██╗      ██╔══██╗██╔══██╗██╔════╝██║  ██║
+ ██║     ██╔████╔██║███████╗██║  ██║█████╗██║  ██║███████║███████╗███████║
+ ██║     ██║╚██╔╝██║╚════██║██║  ██║╚════╝██║  ██║██╔══██║╚════██║██╔══██║
+ ╚██████╗██║ ╚═╝ ██║███████║██████╔╝      ██████╔╝██║  ██║███████║██║  ██║
+  ╚═════╝╚═╝     ╚═╝╚══════╝╚═════╝       ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+                                                                         
                                                     """
 # Absolute path to the project
 project_path = "/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
 #project_path = "/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/"
+
+# Path to the project logs directory
+logs_path = "../server/logs"
 
 # nginx commands
 run_server = "sudo nginx -c" + project_path + "CMSD-DASH/server/nginx/config/nginx.conf"
@@ -27,16 +32,16 @@ reset_active_sessions_2 = "curl http://localhost:8090/resetSessions"
 run_monitor = "python3 monitor.py"
 
 # dash-js command
-launch_dash_js = "cd " + project_path + "/CMSD-DASH/dash.js/ && grunt dev"
+launch_dash_js = "cd " + project_path + "CMSD-DASH/dash.js/ && grunt dev"
 
 # log commands
 access_log = "tail -f /var/log/nginx/access.log"
 error_log = "tail -f /var/log/nginx/error.log"
-server_1_log = "tail -f " + project_path + "/CMSD-DASH/server/logs/cmsd.log"
-server_2_log = "tail -f " + project_path + "/CMSD-DASH/server/logs/cmsd2.log"
+server_1_log = "tail -f " + project_path + "CMSD-DASH/server/logs/cmsd.log"
+server_2_log = "tail -f " + project_path + "CMSD-DASH/server/logs/cmsd2.log"
 
 # run clients command
-run_clients = "cd " + project_path + "/CMSD-DASH/dash-test && sudo bash batch_test.sh" 
+run_clients = "cd " + project_path + "CMSD-DASH/dash-test && sudo bash batch_test.sh" 
 
 
 def run_command(command: str):
@@ -55,7 +60,7 @@ def start():
 def print_options():
     print(">>> Options")
     print(" 1) Start servers")
-    print(" 2) Launch dash-js")
+    print(" 2) Launch dash.js")
     print(" 3) Run multiple clients")
     print(" 4) Reload server config")
     print(" 5) Restart servers")
@@ -65,6 +70,7 @@ def print_options():
     print(" 9) Start monitor")
     print("10) Watch logs")
     print("11) Clear screen")
+    print("12) Reset")
 
 
 def print_servers():
@@ -184,11 +190,13 @@ def set_new_overload(server: str):
             print("This was sadly not an option, try again.\n")
 
 def main():
+    if not os.path.exists(logs_path):
+        os.makedirs(logs_path)
     start()
 
     while(True):
         print_options()
-        uc = get_user_choice(11)
+        uc = get_user_choice(12)
         if uc == 1:
             run_command(run_server)
         if uc == 2:
@@ -242,7 +250,14 @@ def main():
             elif fc == 5:
                 main()
         if uc == 11:
-            main()  
+            main()
+        if uc == 12:
+            run_command(stop_server)
+            run_command(reset_active_sessions_1)
+            run_command(reset_active_sessions_2)
+            run_command("sudo killall chrome") 
+            run_command("sudo bash tc-network-profiles/kill.sh")
+            run_command(restart_server)
 
 
 
