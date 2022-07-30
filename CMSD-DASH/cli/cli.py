@@ -208,7 +208,6 @@ def main():
             run_command(reload_server)
             run_command(reset_active_sessions_1)
             run_command(reset_active_sessions_2)
-            # run_command("sudo killall chrome") 
         if uc == 5:
             run_command(restart_server)
         if uc == 6:
@@ -256,6 +255,7 @@ def main():
             run_command(reset_active_sessions_1)
             run_command(reset_active_sessions_2)
             run_command("sudo killall chrome") 
+            run_command("sudo killall grunt") 
             run_command("sudo bash tc-network-profiles/kill.sh")
             run_command(restart_server)
 
