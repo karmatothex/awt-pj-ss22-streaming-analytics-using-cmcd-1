@@ -12,7 +12,7 @@ server2_port = 8090
 
 
 def load_color(load: int, overloaded) -> str:
-    if load  < 60 and overloaded != "true":
+    if load  <= 60 and overloaded != "true":
         return f"\033[92m {load} \033[0m"
     else:
         return f"\033[91m {load}   \033[0m"
@@ -33,8 +33,11 @@ def query_servers():
     data2 = r2.json()
     res = []
 
+    print(data1)
+    print(data1["additional_load"])
     res.append(["identifier", data1["identifier"], data2["identifier"]])
-    res.append(["current_load", load_color(int(data1["current_load"]), data1["overload"]), load_color(int(data2["current_load"]), data2["overload"])])
+    res.append(["total_load", load_color((int(data1["current_load"]) + int(data1["additional_load"])), data1["overload"]), load_color((int(data2["current_load"])+ int(data2["additional_load"])), data2["overload"])])
+    res.append(["non_client_load", data1["additional_load"], data2["additional_load"]])
     if "maxBitrate" in data1 and "maxBitrate" in data2:
         res.append(["bitrateLimit", data1["maxBitrate"], data2["maxBitrate"]])
     else:
