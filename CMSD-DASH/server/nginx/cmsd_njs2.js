@@ -2,8 +2,8 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // TODO: insert the absolute path to the project
-// var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
-var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+//var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 
 var LOGPATH = PROJECTPATH + 'server/logs/';
 
@@ -140,6 +140,9 @@ function getResourceUsingSubrequestBBRD(r) {
         writeLog("Overload occured");
         dynamicResp += ",du";
         overload = true;
+    } else if(getServerLoad_intern()+20 > 60 && isClientNew(paramsObj['sid']) ){
+        writeLog("Client could cause overload");
+        dynamicResp += ",du";
     }
     // todo
     cacheServerInfo(paramsObj, overload);
@@ -379,6 +382,17 @@ function getNumberOfClients_intern() {
     }
 }
 
+function isClientNew(sid) {
+    try {
+        var jsonStr = fs.readFileSync(SERVER2INFO);
+        var jsonObj = JSON.parse(jsonStr);
+        return jsonObj.activeSessions.includes(sid);
+    } catch (e) {
+        // r.return(500, e + '\n');
+        return e;
+    }
+}
+
 // handle server info: load, sessions, number of clients
 function cacheServerInfo(paramsObj, overload) {
     var sid = ''
@@ -395,7 +409,7 @@ function cacheServerInfo(paramsObj, overload) {
 
     // if a new client wants to connect with the server and the server is not overloaded, cache sid
     // if client is connected and server sends overload flag, delete sid (also send du flag in getResourceUsingSubrequestBBRD)
-    if (!jsonObj.activeSessions.includes(sid2) && !overload) {
+    if (!jsonObj.activeSessions.includes(sid2) && !overload && jsonObj.current_load+20<=60) {
         jsonObj.activeSessions.push(sid2);
     } else if (jsonObj.activeSessions.includes(sid2) && overload) {
         const index = jsonObj.activeSessions.indexOf(sid2);
@@ -459,7 +473,7 @@ function getOverload_intern() {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
-        return jsonObj.overload;
+        return !jsonObj.overload;
     } catch (e) {
         return e;
     }

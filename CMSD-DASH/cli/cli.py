@@ -256,7 +256,7 @@ def main():
                 elif uc == 4:
                     set_new_overload(str(sc))
                 elif uc == 5:
-                    set_additional_load(server)
+                    set_additional_load(str(sc))
                 elif uc == 6:
                     break
         if uc == 9:

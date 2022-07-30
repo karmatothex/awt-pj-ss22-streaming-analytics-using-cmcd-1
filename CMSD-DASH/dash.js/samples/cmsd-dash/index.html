@@ -7,6 +7,8 @@
     <script src="../../dist/dash.all.debug.js"></script>
 
     <script class="code">
+        var origins = [];
+        
         var player;
         var ruleUsed = '';
 
@@ -250,15 +252,22 @@
             
             
             if (e.request.responseHeaders.includes("du")) { //switching between origins if du flag came
+                if(origins.includes("8080") && origins.includes("8090")) {
+                    alert("Looks like both servers are overloaded");
+                    player.reset(); //TODO: fix it
+                }
                 console.warn("...SERVER OVERLOADED...")
                     var stopedAt = player.time();
                     if (e.request.serviceLocation.includes("8080")) {
                         // console.warn(">>>Switching to the port 8090")
+                        origins.push("8080")
                         player.attachSource("http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd" + "#t=" + stopedAt.toString())
                     } else {
                         // console.warn(">>>Switching to the port 8080")
+                        origins.push("8090")
                         player.attachSource("http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd" + "#t=" + stopedAt.toString())
                     }
+                console.warn(origins)
             }
 
             console.warn("response headers :")

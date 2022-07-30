@@ -2,8 +2,8 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // TODO: insert the absolute path to the project
-//  var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
-var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+  var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
+//var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 
 var LOGPATH = PROJECTPATH + 'server/logs/';
 
@@ -97,8 +97,7 @@ function processQueryArgs(str) {
         if (paramsArr[i].includes('=')) {
             var key = paramsArr[i].split('=')[0];
             var value = paramsArr[i].split('=')[1];
-        }
-        else {  // e.g. `bs` key does not have a value in CMCD query arg format
+        } else {  // e.g. `bs` key does not have a value in CMCD query arg format
             var key = paramsArr[i];
             var value = 'true';
         }
@@ -140,6 +139,9 @@ function getResourceUsingSubrequestBBRD(r) {
         writeLog("Overload occured");
         dynamicResp += ",du";
         overload = true;
+    } else if ((getServerLoad_intern() + 20) > 60 && isClientNew(paramsObj['sid'])) {
+        writeLog("Client could cause overload");
+        dynamicResp += ",du";
     }
     // todo
     cacheServerInfo(paramsObj, overload);
@@ -202,11 +204,17 @@ function getBufferBasedDelay(r) {
         return 0;   // disables response delay
     }
 
-    if ('sid' in paramsObj) { metricsObj['sid'] = paramsObj['sid']; }
-    else { metricsObj['sid'] = -1; }
+    if ('sid' in paramsObj) {
+        metricsObj['sid'] = paramsObj['sid'];
+    } else {
+        metricsObj['sid'] = -1;
+    }
 
-    if ('did' in paramsObj) { metricsObj['did'] = paramsObj['did']; }
-    else { metricsObj['did'] = '-1'; }
+    if ('did' in paramsObj) {
+        metricsObj['did'] = paramsObj['did'];
+    } else {
+        metricsObj['did'] = '-1';
+    }
 
     var delay;
     var bMin = Number(paramsObj['com.example-bmn']);
@@ -221,8 +229,7 @@ function getBufferBasedDelay(r) {
     writeLog(".. " + (metricsObj['did'].indexOf('dash.js-v4.2.1') > -1))
     if (metricsObj['did'].indexOf('dash.js-v4.2.1') > -1) {        // v4.2.1 uses ms; convert to s
         bufferLength = Number(paramsObj['bl']) / 1000;
-    }
-    else {                                               // v3.1.3 uses seconds
+    } else {                                               // v3.1.3 uses seconds
         bufferLength = Number(paramsObj['bl']);
     }
     writeLog('.. bl = ' + bufferLength)
@@ -293,8 +300,8 @@ function getBufferBasedDelay(r) {
         metricsObj['delayTimestampUpdateToConfig'] = -1
     }
 
-    //
-    // Case 2: Client is in surplus; apply delay
+        //
+        // Case 2: Client is in surplus; apply delay
     //
     else if (bufferLength > bMax) {
         writeLog('[case2] Surplus client found, bufferLength: ' + bufferLength);
@@ -331,7 +338,7 @@ function getServerLoad(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
-        r.return(200, 'Load from ' + jsonObj.identifier + ' is at ' + parseInt(jsonObj.current_load) + parseInt(jsonObj.additional_load)+ '%\n');
+        r.return(200, 'Load from ' + jsonObj.identifier + ' is at ' + parseInt(jsonObj.current_load) + parseInt(jsonObj.additional_load) + '%\n');
     } catch (e) {
         r.return(500, e + '\n');
     }
@@ -379,10 +386,23 @@ function getNumberOfClients_intern() {
     }
 }
 
+function isClientNew(sid) {
+    try {
+        var jsonStr = fs.readFileSync(SERVER1INFO);
+        var jsonObj = JSON.parse(jsonStr);
+        return !jsonObj.activeSessions.includes(sid);
+    } catch (e) {
+        // r.return(500, e + '\n');
+        return e;
+    }
+}
+
 // handle server info: load, sessions, number of clients
 function cacheServerInfo(paramsObj, overload) {
     var sid = ''
-    if ('sid' in paramsObj) { sid = paramsObj['sid']; }
+    if ('sid' in paramsObj) {
+        sid = paramsObj['sid'];
+    }
 
     // cut "" from string
     var sid2 = sid.replace(/"/g, "");
@@ -395,7 +415,7 @@ function cacheServerInfo(paramsObj, overload) {
 
     // if a new client wants to connect with the server and the server is not overloaded, cache sid
     // if client is connected and server sends overload flag, delete sid (also send du flag in getResourceUsingSubrequestBBRD)
-    if (!jsonObj.activeSessions.includes(sid2) && !overload) {
+    if (!jsonObj.activeSessions.includes(sid2) && !overload && (jsonObj.current_load + 20) <= 60) {
         jsonObj.activeSessions.push(sid2);
     } else if (jsonObj.activeSessions.includes(sid2) && overload) {
         const index = jsonObj.activeSessions.indexOf(sid2);
