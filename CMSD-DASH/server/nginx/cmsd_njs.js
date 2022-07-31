@@ -390,7 +390,8 @@ function isClientNew(sid) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
-        return !jsonObj.activeSessions.includes(sid);
+        var sid2 = sid.replace(/"/g, "");
+        return !jsonObj.activeSessions.includes(sid2);
     } catch (e) {
         // r.return(500, e + '\n');
         return e;
@@ -415,12 +416,13 @@ function cacheServerInfo(paramsObj, overload) {
 
     // if a new client wants to connect with the server and the server is not overloaded, cache sid
     // if client is connected and server sends overload flag, delete sid (also send du flag in getResourceUsingSubrequestBBRD)
-    if (!jsonObj.activeSessions.includes(sid2) && !overload && (jsonObj.current_load + 20) <= 60) {
+    if (!jsonObj.activeSessions.includes(sid2) && !overload && ((parseInt(jsonObj.current_load) + 20) <= 60)) {
         jsonObj.activeSessions.push(sid2);
     } else if (jsonObj.activeSessions.includes(sid2) && overload) {
         const index = jsonObj.activeSessions.indexOf(sid2);
         jsonObj.activeSessions.splice(index, 1);
     }
+
 
     // set number of clients
     jsonObj.numOfClients = jsonObj.activeSessions.length;
