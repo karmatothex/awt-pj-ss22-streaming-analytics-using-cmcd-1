@@ -8,13 +8,13 @@ The Common-Media-Client-Data (CMCD) standard defines the format and the types of
 
 Common-Media-Server-Data (CMSD) - not published yet - enables server-side (CDN/origin) communication to the clients. Early implementations are available for experimentation.
 
-This project extends the prototype [CMSD-DASH of NUStreaming](https://github.com/NUStreaming/CMSD-DASH) and is described in detail in the paper ❗TODO❗ which can be found in the `report` folder.
+This project extends the prototype [CMSD-DASH of NUStreaming](https://github.com/NUStreaming/CMSD-DASH) and is described in detail in the paper *Streaming Analytics using CMCD and CMSD* which can be found in the `report` folder.
 ***
 
 <br>
 
 ## Installation Requirements
-To start this project, you must first install the following requirements. Please note that the installation commands are based on Ubuntu 22.04. If you are using a different operating system, you may need to adjust the installation procedure.
+To get started with this project, you must first install the following requirements. Please note that the installation commands are based on Ubuntu 22.04. If you are using a different operating system, you may need to adjust the installation procedure.
 
 <br>
 
@@ -33,7 +33,7 @@ To start this project, you must first install the following requirements. Please
 <br>
 
 ### Google Chrome
-- `wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb`
+- Download Chrome:`wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb`
 - `sudo apt install ./google-chrome-table_current_amd64.deb`
 
 <br>
@@ -102,9 +102,10 @@ Before you can finally run this project, you need to perform a few setup steps, 
 
 ### Setup the nginx server
 - Open `server/nginx/config/nginx.conf` and edit `<PATH_TO_CMSD-DASH>` (under `location /media/vod`) to indicate the absolute path to this repository
-	- Do this for both servers -> line 69 and line 173
+	- Do this for both servers -> line 69 and line 179
 - Test and launch nginx: `sudo nginx -c <PATH_TO_CMSD-DASH>/server/nginx/config/nginx.conf` (note that the absolute path must be used)
 - Reload nginx: `sudo nginx -c <PATH_TO_CMSD-DASH>/server/nginx/config/nginx.conf -s reload`, if the configuration has changed
+- Open `server/nginx/cmsd_njs.js` and `server/nginx/cmsd_njs2.js` and edit the variable `PROJECTPATH` (line 5) to the absolute path to this repository
 
 <br>
 
@@ -146,6 +147,8 @@ During the course of this project and especially during testing, we had to use m
 - Activate virtual environment: `source venv/bin/activate`
 	- Always do this in your specific terminal window if you want to use the CLI❗
 - Install required Python libraries: `python -m pip install -r requirements.txt`
+- Open `CMSD-DASH/cli/cli.py` and edit the variable `project_path` (line 16) to the absolute path to this repository
+
 
 <br>
 
@@ -170,7 +173,7 @@ Currently there are 12 Options:
 9. This option will open an overview in which information such as the number and connections and load of the individual servers are displayed. The view updates itself regularly.
 10. Will open a new menu where you can choose between different log files (nginx access.log, nginx error.log, server 1 log, server 2 log). After a file is selected, the file is dynamically displayed using the `tail` command.
 11. Will simply clear the screen.
-12. This option is intended as a hard reset and terminates the entire project. After that the server (option 1) and the client(s) (option 2 or 3) must be restarted.
+12. This option is intended as a hard reset and terminates the entire project. After that the server (option 1) and the client(s) (option 2 and 3) must be restarted.
 
 <br>
 
@@ -180,7 +183,7 @@ Currently there are 12 Options:
 - By running option 3 and on completing the test run, results are generated in the `results/<timestamp>_multiple_clients/` folder ordered by the test run’s timestamp. 
 - To generate summary results across all clients in a test run, first navigate to the `results/` folder and then run `python3 generate_summary.py`
 	- After that you are prompted for the folder name that was generated, insert the name and press enter
-- **Note**: To take advantage of the CLI one could open multiple instances of the CLI, for example in multiple tabs or panes (tmux).
+- **Note**: To take advantage of the CLI one could open multiple instances of the CLI, for example in multiple tabs or panes (tmux)
 - e.g.
 
 	![CLI](CMSD-DASH/images/cli_2.png "CLI")
