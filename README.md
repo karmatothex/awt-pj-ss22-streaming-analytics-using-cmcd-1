@@ -34,7 +34,7 @@ To get started with this project, you must first install the following requireme
 
 ### Google Chrome
 - Download Chrome:`wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb`
-- `sudo apt install ./google-chrome-table_current_amd64.deb`
+- `sudo apt install ./google-chrome-stable_current_amd64.deb`
 
 <br>
 
@@ -87,7 +87,8 @@ To get started with this project, you must first install the following requireme
 ### Python
 - `sudo apt install python3`
 - (already installed on ubuntu)
-- virtualenv: `pip install virtualenv`
+- `sudo apt install python3-pip`
+- virtualenv: `pip3 install virtualenv` or `sudo apt install python3.10-venv`
 
 ***
 
@@ -141,7 +142,8 @@ During the course of this project and especially during testing, we had to use m
 
 ### Initial setup
 - Install Python: `sudo apt install python3`
-- Install virtualenv: `pip install virtualenv`
+- `sudo apt install python3-pip`
+- virtualenv: `pip3 install virtualenv` or `sudo apt install python3.10-venv`
 - Navigate to `/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/cli/`
 - Create virtual environment `venv`: `python3 -m venv venv`
 - Activate virtual environment: `source venv/bin/activate`
