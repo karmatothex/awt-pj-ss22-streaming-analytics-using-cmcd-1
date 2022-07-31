@@ -105,6 +105,7 @@ Before you can finally run this project, you need to perform a few setup steps, 
 	- Do this for both servers -> line 69 and line 179
 - Test and launch nginx: `sudo nginx -c <PATH_TO_CMSD-DASH>/server/nginx/config/nginx.conf` (note that the absolute path must be used)
 - Reload nginx: `sudo nginx -c <PATH_TO_CMSD-DASH>/server/nginx/config/nginx.conf -s reload`, if the configuration has changed
+- Open `server/nginx/cmsd_njs.js` and `server/nginx/cmsd_njs2.js` and edit the variable `PROJECTPATH` (line 5) to the absolute path to this repository
 
 <br>
 
@@ -146,6 +147,8 @@ During the course of this project and especially during testing, we had to use m
 - Activate virtual environment: `source venv/bin/activate`
 	- Always do this in your specific terminal window if you want to use the CLI❗
 - Install required Python libraries: `python -m pip install -r requirements.txt`
+- Open `CMSD-DASH/cli/cli.py` and edit the variable `project_path` (line 16) to the absolute path to this repository
+
 
 <br>
 
