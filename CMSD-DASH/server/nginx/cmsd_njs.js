@@ -13,6 +13,10 @@ var CONFIGFILE = LOGPATH + 'cmsd_config.json';
 
 var SERVER1INFO = PROJECTPATH + 'server/nginx/config/server1.json'
 
+var LOAD_PER_CLIENT = 20
+var OVERLOAD_THRESHOLD = 60
+var SHARED_BANDWIDTH = 10000
+
 function writeLog(msg) {
     var dateTime = new Date().toLocaleString();
     var logLine = ('\n[' + dateTime + '] ' + msg);
@@ -135,24 +139,23 @@ function getResourceUsingSubrequestBBRD(r) {
     var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay);
     var overload = false;
     // set overload threshold to 60 %
-    if (getServerLoad_intern() > 60 || getOverload_intern() == "true") {
+    if (getServerLoad_intern() > OVERLOAD_THRESHOLD || getOverload_intern() == "true") {
         writeLog("Overload occured");
         dynamicResp += ",du";
         overload = true;
-    } else if ((getServerLoad_intern() + 20) > 60 && isClientNew(paramsObj['sid'])) {
+    } else if ((getServerLoad_intern() + LOAD_PER_CLIENT) > OVERLOAD_THRESHOLD && isClientNew(paramsObj['sid'])) {
         writeLog("Client could cause overload");
         dynamicResp += ",du";
     }
     // todo
     cacheServerInfo(paramsObj, overload);
 
-    var bandwithThroughput = 10000;
-    var reservedBandwith = 1000; //rest can be divided between clients
+
 
     var numc = getNumberOfClients_intern();
     if (numc == 0)
         numc = 1;
-    var maxBitrate = (bandwithThroughput - reservedBandwith) / numc;
+    var maxBitrate = SHARED_BANDWIDTH/ numc;
 
     setMaxBitrate(maxBitrate);
     dynamicResp += ",mb=" + parseInt(maxBitrate, 10).toString();
@@ -416,7 +419,7 @@ function cacheServerInfo(paramsObj, overload) {
 
     // if a new client wants to connect with the server and the server is not overloaded, cache sid
     // if client is connected and server sends overload flag, delete sid (also send du flag in getResourceUsingSubrequestBBRD)
-    if (!jsonObj.activeSessions.includes(sid2) && !overload && ((parseInt(jsonObj.current_load) + 20) <= 60)) {
+    if (!jsonObj.activeSessions.includes(sid2) && !overload && ((parseInt(jsonObj.current_load) + LOAD_PER_CLIENT) <= OVERLOAD_THRESHOLD)) {
         jsonObj.activeSessions.push(sid2);
     } else if (jsonObj.activeSessions.includes(sid2) && overload) {
         const index = jsonObj.activeSessions.indexOf(sid2);
@@ -428,7 +431,7 @@ function cacheServerInfo(paramsObj, overload) {
     jsonObj.numOfClients = jsonObj.activeSessions.length;
 
     // set server load -> simulate 20% load per client
-    jsonObj.current_load = (jsonObj.numOfClients * 2 * 10).toString();
+    jsonObj.current_load = (jsonObj.numOfClients * LOAD_PER_CLIENT).toString();
 
     try {
         fs.writeFileSync(SERVER1INFO, JSON.stringify(jsonObj));

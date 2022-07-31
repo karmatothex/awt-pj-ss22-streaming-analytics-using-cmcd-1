@@ -29,7 +29,7 @@ reset_active_sessions_1 = "curl http://localhost:8080/resetSessions"
 reset_active_sessions_2 = "curl http://localhost:8090/resetSessions"
 
 # monitor command
-run_monitor = "python3 monitor.py"
+run_monitor = "python3 " + project_path + "CMSD-DASH/cli/monitor.py"
 
 # dash-js command
 launch_dash_js = "cd " + project_path + "CMSD-DASH/dash.js/ && grunt dev"
