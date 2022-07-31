@@ -1,7 +1,7 @@
 var querystring = require('querystring');
 var fs = require('fs');
 
-// TODO: insert the absolute path to the project
+// Note: insert the absolute path to the project
 var PROJECTPATH = '/home/master/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 //var PROJECTPATH = '/home/max/Documents/awt-pj-ss22-streaming-analytics-using-cmcd-and-cmsd-1/CMSD-DASH/';
 
@@ -113,7 +113,7 @@ function processQueryArgs(str) {
 }
 
 //
-// Sample query: http://localhost:8080/cmsd-njs//media/vod/bbb_30fps_akamai/bbb_30fps.mpd?CMCD=bl%3D21300
+// Sample query: http://localhost:8090/cmsd-njs//media/vod/bbb_30fps_akamai/bbb_30fps.mpd?CMCD=bl%3D21300
 //
 function getResourceUsingSubrequestBBRD(r) {
     writeLog('');
@@ -139,20 +139,17 @@ function getResourceUsingSubrequestBBRD(r) {
     var staticResp = 'n=' + getOriginIdentifier() + ',';
     var dynamicResp = ('com.example-dl=' + r.variables.bufferBasedDelay2);
     var overload = false;
-    // set overload threshold to 60 %
+    // set du flag in case of overload
     if (getServerLoad_intern() > OVERLOAD_THRESHOLD || getOverload_intern() == "true") {
         writeLog("Overload occured");
         dynamicResp += ",du";
         overload = true;
-    } else if(getServerLoad_intern()+LOAD_PER_CLIENT > OVERLOAD_THRESHOLD && isClientNew(paramsObj['sid']) ){
+    } else if (getServerLoad_intern() + LOAD_PER_CLIENT > OVERLOAD_THRESHOLD && isClientNew(paramsObj['sid'])) {
         writeLog("Client could cause overload");
         dynamicResp += ",du";
     }
-    // todo
-    cacheServerInfo(paramsObj, overload);
 
-    var bandwithThroughput = 10000;
-    var reservedBandwith = 1000; //rest can be divided between clients
+    cacheServerInfo(paramsObj, overload);
 
     var numc = getNumberOfClients_intern();
     if (numc == 0)
@@ -186,7 +183,7 @@ function getResourceUsingSubrequestBBRD(r) {
 // Triggered via bufferBasedResponseDelay.echo_sleep setting in nginx.conf
 //
 // Test queries -
-// curl -i http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/bbb_30fps_akamai/bbb_30fps.mpd?CMCD=bl%3D21300%2Ccom.example-bmx%3D20000%2Ccom.example-bmn%3D5000%2Cot%3Dv%2Cbr%3D1000%2Cd%3D4000%2Cmtp%3D1000
+// curl -i http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/bbb_30fps_akamai/bbb_30fps.mpd?CMCD=bl%3D21300%2Ccom.example-bmx%3D20000%2Ccom.example-bmn%3D5000%2Cot%3Dv%2Cbr%3D1000%2Cd%3D4000%2Cmtp%3D1000
 //
 function getBufferBasedDelay(r) {
     var metricsObj = {}
@@ -209,11 +206,17 @@ function getBufferBasedDelay(r) {
         return 0;   // disables response delay
     }
 
-    if ('sid' in paramsObj) { metricsObj['sid'] = paramsObj['sid']; }
-    else { metricsObj['sid'] = -1; }
+    if ('sid' in paramsObj) { 
+        metricsObj['sid'] = paramsObj['sid']; 
+    } else { 
+        metricsObj['sid'] = -1; 
+    }
 
-    if ('did' in paramsObj) { metricsObj['did'] = paramsObj['did']; }
-    else { metricsObj['did'] = '-1'; }
+    if ('did' in paramsObj) { 
+        metricsObj['did'] = paramsObj['did']; 
+    } else { 
+        metricsObj['did'] = '-1'; 
+    }
 
     var delay;
     var bMin = Number(paramsObj['com.example-bmn']);
@@ -228,8 +231,7 @@ function getBufferBasedDelay(r) {
     writeLog(".. " + (metricsObj['did'].indexOf('dash.js-v4.2.1') > -1))
     if (metricsObj['did'].indexOf('dash.js-v4.2.1') > -1) {        // v4.2.1 uses ms; convert to s
         bufferLength = Number(paramsObj['bl']) / 1000;
-    }
-    else {                                               // v3.1.3 uses seconds
+    } else {                                               // v3.1.3 uses seconds
         bufferLength = Number(paramsObj['bl']);
     }
     writeLog('.. bl = ' + bufferLength)
@@ -333,7 +335,7 @@ function getBufferBasedDelay(r) {
     return delay;
 }
 
-// curl -v http://localhost:8080/getStatus
+// curl -v http://localhost:8090/getServerLoad
 function getServerLoad(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER2INFO);
@@ -364,6 +366,7 @@ function getOriginIdentifier() {
     }
 }
 
+// curl -v http://localhost:8090/getClients
 function getNumberOfClients(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER2INFO);
@@ -456,6 +459,7 @@ function resetSessions(r) {
     }
 }
 
+// curl -v http://localhost:8090/getServerInfo
 function getServerInfo(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER2INFO);
@@ -466,6 +470,7 @@ function getServerInfo(r) {
     }
 }
 
+// curl -v http://localhost:8090/getOverload
 function getOverload(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER2INFO);
@@ -500,6 +505,7 @@ function setMaxBitrate(bitrate) {
     }
 }
 
+// purpose of this function is to show server switching from client in chrome and to show that the video continues loading where it left off on the other server
 // e.g. set true: curl -v --header "overload: true" http://localhost:8090/setoOverload -> after that client will switch server
 function setOverload(r) {
     var overload = r.headersIn.overload;
@@ -520,6 +526,7 @@ function setOverload(r) {
     }
 }
 
+// TODO
 function setAdditionalLoad(r) {
     var load = r.headersIn.load;
 
