@@ -13,8 +13,11 @@ var CONFIGFILE = LOGPATH + 'cmsd_config.json';
 
 var SERVER1INFO = PROJECTPATH + 'server/nginx/config/server1.json'
 
+//following two values impact, how many clients can be connected to this server
 var LOAD_PER_CLIENT = 20
 var OVERLOAD_THRESHOLD = 60
+
+//this value is divided by the number of clients and determines their maximal bitrate
 var SHARED_BANDWIDTH = 10000
 
 function writeLog(msg) {
