@@ -185,7 +185,7 @@ def set_additional_load(server: str):
         user_input = input("Enter desirable load:")
         print("---------------------\n")
         try:
-            if 0 < int(user_input) <= 100:
+            if 0 <= int(user_input) <= 100:
                 if server == "1":
                     command = "curl --header \"load: " + user_input + "\" http://localhost:8080/setAdditionalLoad"
                     os.system(command)

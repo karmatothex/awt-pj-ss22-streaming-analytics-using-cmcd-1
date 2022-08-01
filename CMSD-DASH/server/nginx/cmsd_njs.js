@@ -144,6 +144,7 @@ function getResourceUsingSubrequestBBRD(r) {
         writeLog("Overload occured");
         dynamicResp += ",du";
         overload = true;
+        //set du flag if client is new and it will lead to an overload
     } else if ((getServerLoad_intern() + LOAD_PER_CLIENT) > OVERLOAD_THRESHOLD && isClientNew(paramsObj['sid'])) {
         writeLog("Client could cause overload");
         dynamicResp += ",du";
@@ -151,13 +152,18 @@ function getResourceUsingSubrequestBBRD(r) {
 
     cacheServerInfo(paramsObj, overload);
 
+    //computing maximal client bitrate, based on the number of clients
+    //doing it after caching in case values were changed
     var numc = getNumberOfClients_intern();
     if (numc == 0)
         numc = 1;
     var maxBitrate = SHARED_BANDWIDTH / numc;
-
+    //storing the max bitrate value
     setMaxBitrate(maxBitrate);
+    //providing the max bitrate value to the client
     dynamicResp += ",mb=" + parseInt(maxBitrate, 10).toString();
+
+    //this CMCD values are used also in CMSD
     var cmcdValuesToTake = ["st", "ot", "sf", "v"]
     for (var value in cmcdValuesToTake) {
         if (cmcdValuesToTake[value] in paramsObj) {
@@ -165,6 +171,7 @@ function getResourceUsingSubrequestBBRD(r) {
         }
     }
 
+    //sending a response
     function done(res) {
         r.headersOut['CMSD-Dynamic'] = dynamicResp;
         r.headersOut['CMSD-Static'] = staticResp;
@@ -350,6 +357,7 @@ function getServerLoad_intern() {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
         var jsonObj = JSON.parse(jsonStr);
+        //absolute server load is sum of client load and user-defined additional load
         return parseInt(jsonObj.current_load) + parseInt(jsonObj.additional_load);
     } catch (e) {
         return e;
@@ -389,6 +397,7 @@ function getNumberOfClients_intern() {
     }
 }
 
+//checks if the session id sid is in servers active sessions
 function isClientNew(sid) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
@@ -418,9 +427,10 @@ function cacheServerInfo(paramsObj, overload) {
     }
 
     // if a new client wants to connect with the server and the server is not overloaded, cache sid
-    // if client is connected and server sends overload flag, delete sid (also send du flag in getResourceUsingSubrequestBBRD)
+    //if adding of this client will lead to an overload, server will not add it to active sessions
     if (!jsonObj.activeSessions.includes(sid2) && !overload && ((parseInt(jsonObj.current_load) + LOAD_PER_CLIENT) <= OVERLOAD_THRESHOLD)) {
         jsonObj.activeSessions.push(sid2);
+        // if client is connected and server sends overload flag, delete sid (also send du flag in getResourceUsingSubrequestBBRD)
     } else if (jsonObj.activeSessions.includes(sid2) && overload) {
         const index = jsonObj.activeSessions.indexOf(sid2);
         jsonObj.activeSessions.splice(index, 1);
@@ -430,7 +440,7 @@ function cacheServerInfo(paramsObj, overload) {
     // set number of clients
     jsonObj.numOfClients = jsonObj.activeSessions.length;
 
-    // set server load -> simulate 20% load per client
+    // set server load
     jsonObj.current_load = (jsonObj.numOfClients * LOAD_PER_CLIENT).toString();
 
     try {
@@ -439,6 +449,7 @@ function cacheServerInfo(paramsObj, overload) {
     }
 }
 
+//sets all server key-parameters to default value
 function resetSessions(r) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
@@ -492,6 +503,7 @@ function getOverload_intern() {
     }
 }
 
+//allow to directly set maximal bitrate for the (all) clients on the server
 function setMaxBitrate(bitrate) {
     try {
         var jsonStr = fs.readFileSync(SERVER1INFO);
@@ -527,7 +539,9 @@ function setOverload(r) {
     }
 }
 
-// TODO
+//this function allows to increase the server load by external user-specified value
+//this value will be summarized with load of clients
+//curl -v --header "load: 20" http://localhost:8080/setoOverload
 function setAdditionalLoad(r) {
     var load = r.headersIn.load;
 

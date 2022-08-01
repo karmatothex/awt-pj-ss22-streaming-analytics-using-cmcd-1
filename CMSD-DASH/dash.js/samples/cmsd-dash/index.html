@@ -7,8 +7,8 @@
     <script src="../../dist/dash.all.debug.js"></script>
 
     <script class="code">
-        var origins = [];
-        
+        var overloadedOrigins = [];
+
         var player;
         var ruleUsed = '';
 
@@ -245,40 +245,41 @@
         player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => {
             console.warn("Fragment loaded")
             console.warn(e)
-            if (e.request.responseHeaders.includes("n=")){
-                document.getElementById("origin").innerHTML = e.request.responseHeaders.split("n=")[1].split(",")[0];
 
+            //getting the origin name
+            if (e.request.responseHeaders.includes("n=")) {
+                document.getElementById("origin").innerHTML = e.request.responseHeaders.split("n=")[1].split(",")[0];
             }
-            
-            
-            if (e.request.responseHeaders.includes("du")) { //switching between origins if du flag came
-                if(origins.includes("8080") && origins.includes("8090")) {
+
+            //if server send a DU flag, the client is forced to switch to another server
+            //currently the client is switching between 2 server instances on localhost: with ports 8080 and 8090 
+            if (e.request.responseHeaders.includes("du")) {
+                //if both servers are overloaded, sending an alert and trying to stop the player
+                if (overloadedOrigins.includes("8080") && overloadedOrigins.includes("8090")) {
                     alert("Looks like both servers are overloaded");
-                    player.reset(); //TODO: fix it
+                    player.stop(); //future work: find how to stop the player without crashing
                 }
                 console.warn("...SERVER OVERLOADED...")
-                    var stopedAt = player.time();
-                    if (e.request.serviceLocation.includes("8080")) {
-                        // console.warn(">>>Switching to the port 8090")
-                        origins.push("8080")
-                        player.attachSource("http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd" + "#t=" + stopedAt.toString())
-                    } else {
-                        // console.warn(">>>Switching to the port 8080")
-                        origins.push("8090")
-                        player.attachSource("http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd" + "#t=" + stopedAt.toString())
-                    }
-                console.warn(origins)
+                var stopedAt = player.time(); //saving the current time, so we can switch to it
+                //simple logic whicg checks the port of current server and switches to another one
+                if (e.request.serviceLocation.includes("8080")) {
+                    overloadedOrigins.push("8080")//we also remember, that the server is overloaded now
+                    //changing the player source to the second server, using a time-anchor
+                    player.attachSource("http://localhost:8090/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd" + "#t=" + stopedAt.toString())
+                } else {
+                    overloadedOrigins.push("8090")
+                    player.attachSource("http://localhost:8080/cmsd-njs/bufferBasedResponseDelay/media/vod/BBB1sAkamai/bbb1sAkamai.mpd" + "#t=" + stopedAt.toString())
+                }
             }
-
-            console.warn("response headers :")
-            console.warn(e.request.responseHeaders);
-            if (e.request.responseHeaders.includes("mb=")) { 
+            
+            //if we got a mb flag, we have to adapt our maximal bitrate
+            if (e.request.responseHeaders.includes("mb=")) {
                 mbvalue = e.request.responseHeaders.split("mb=")[1].split("\n")[0];
 
                 if (mbvalue != player.getSettings().streaming.abr.maxBitrate.video) { //setting max bitrate to mb, if a new value is there
                     player.updateSettings({
                         streaming: {
-                            abr: { 
+                            abr: {
                                 maxBitrate: {
                                     video: parseInt(mbvalue)
                                 }
